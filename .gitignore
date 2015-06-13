@@ -2,3 +2,4 @@ NetInjector/bin/
 NetInjector/obj/
 *.user
 *.suo
+*.DS_Store
