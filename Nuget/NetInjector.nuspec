@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>NetInjector</id>
-    <version>1.0.1</version>
+    <version>1.2.1</version>
     <authors>kirk</authors>
     <owners>kirk</owners>
     <projectUrl>https://github.com/kswoll/netinjector</projectUrl>
