@@ -1,0 +1,4 @@
+NetInjector/bin/
+NetInjector/obj/
+*.user
+*.suo
