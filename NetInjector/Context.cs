@@ -8,7 +8,6 @@ namespace NetInjector
         private ICache cache;
         private IDictionary<Type, IBinding> transientBindings;
 
-
         public Context(Context context = null, ICache cache = null, IDictionary<Type, IBinding> transientBindings = null)
         {
             cache = cache ?? new Cache();
