@@ -4,3 +4,4 @@ NetInjector/obj/
 *.suo
 *.DS_Store
 *.nupkg
+packages/
