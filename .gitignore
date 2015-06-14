@@ -3,3 +3,4 @@ NetInjector/obj/
 *.user
 *.suo
 *.DS_Store
+*.nupkg
