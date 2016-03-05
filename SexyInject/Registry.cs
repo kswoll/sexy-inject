@@ -16,12 +16,12 @@ namespace SexyInject
 
         public Binder<T> Bind<T>()
         {
-            return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>());
+            return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>(this));
         }
 
         public IBinder Bind(Type type)
         {
-            return binders.GetOrAdd(type, x => (IBinder)Activator.CreateInstance(typeof(Binder<>).MakeGenericType(type)));
+            return binders.GetOrAdd(type, x => (IBinder)Activator.CreateInstance(typeof(Binder<>).MakeGenericType(type), this));
         }
 
         public T Get<T>()
@@ -33,13 +33,24 @@ namespace SexyInject
                 {
                     binder = Bind<T>();
                 }
+                else
+                {
+                    throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
+                }
             }
-            return (T)binder.Resolve(new ResolverContext());
+            return (T)binder.Resolve(CreateResolverContext());
         }
 
         public object Get(Type type)
         {
-            return Get(type, new ResolverContext());
+            return Get(type, CreateResolverContext());
+        }
+
+        private ResolverContext CreateResolverContext()
+        {
+            ResolverContext context = null;
+            context = new ResolverContext(x => Get(x, context));
+            return context;
         }
 
         private object Get(Type type, ResolverContext context)
@@ -52,7 +63,7 @@ namespace SexyInject
                     binder = Bind(type);
                 }
             }
-            return binder.Resolve(new ResolverContext());
+            return binder.Resolve(context);
         }
     }
 }

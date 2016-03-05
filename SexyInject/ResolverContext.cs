@@ -11,8 +11,9 @@ namespace SexyInject
 
         internal static MethodInfo resolveMethod = typeof(ResolverContext).GetMethod(nameof(Resolve));
 
-        public ResolverContext()
+        public ResolverContext(Func<Type, object> resolver)
         {
+            this.resolver = resolver;
         }
 
         public object Resolve(Type type)

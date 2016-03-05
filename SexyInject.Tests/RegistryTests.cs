@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace SexyInject.Tests
 {
@@ -11,6 +12,14 @@ namespace SexyInject.Tests
             var registry = new Registry();
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
+        public void NonGenericGet()
+        {
+            var registry = new Registry();
+            var simpleClass = registry.Get(typeof(SimpleClass));
+            Assert.IsTrue(simpleClass is SimpleClass);
         }
 
         [Test]
@@ -30,6 +39,20 @@ namespace SexyInject.Tests
             Assert.IsNotNull(injectionClass.SimpleClass);
         }
 
+        [Test]
+        public void UnregisteredTypeThrowsWhenAllowImplicitRegistrationIsFalse()
+        {
+            var registry = new Registry(false);
+            Assert.Throws<RegistryException>(() => registry.Get<SimpleClass>());
+        }
+
+        [Test]
+        public void ClassWithoutConstructorThrows()
+        {
+            var registry = new Registry();
+            Assert.Throws<ArgumentException>(() => registry.Get<ClassWithoutConstructor>());
+        }
+
         public interface ISimpleClass
         {
         }
@@ -45,6 +68,13 @@ namespace SexyInject.Tests
             public InjectionClass(SimpleClass simpleClass)
             {
                 SimpleClass = simpleClass;
+            }
+        }
+
+        public class ClassWithoutConstructor
+        {
+            private ClassWithoutConstructor()
+            {
             }
         }
     }
