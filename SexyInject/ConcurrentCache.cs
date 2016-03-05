@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetInjector
+namespace SexyInject
 {
     public class ConcurrentCache : ICache
     {

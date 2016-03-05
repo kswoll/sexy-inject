@@ -7,8 +7,8 @@
     <ProjectGuid>{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NetInjector</RootNamespace>
-    <AssemblyName>NetInjector</AssemblyName>
+    <RootNamespace>SexyInject</RootNamespace>
+    <AssemblyName>SexyInject</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

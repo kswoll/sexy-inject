@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace NetInjector
+namespace SexyInject
 {
     public class FactoryResolver : IResolver
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetInjector
+namespace SexyInject
 {
     public class HybridCache : ICache
     {

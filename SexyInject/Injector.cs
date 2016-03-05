@@ -1,4 +1,4 @@
-﻿namespace NetInjector
+﻿namespace SexyInject
 {
     public class Injector
     {

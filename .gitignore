@@ -5,3 +5,5 @@ NetInjector/obj/
 *.DS_Store
 *.nupkg
 packages/
+SexyInject/obj/
+SexyInject/bin/

@@ -1,4 +1,4 @@
-﻿namespace NetInjector
+﻿namespace SexyInject
 {
     public interface IBinding
     {

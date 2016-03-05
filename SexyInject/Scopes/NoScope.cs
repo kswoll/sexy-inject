@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetInjector.Scopes
+namespace SexyInject.Scopes
 {
     public class NoScope : IScope
     {

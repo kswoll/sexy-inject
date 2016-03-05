@@ -1,4 +1,4 @@
-﻿namespace NetInjector.Scopes
+﻿namespace SexyInject.Scopes
 {
     public class TransientScope : IScope
     {

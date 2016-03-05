@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetInjector
+namespace SexyInject
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public class IgnoreAttribute : Attribute

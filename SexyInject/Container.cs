@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using NetInjector.Scopes;
+using SexyInject.Scopes;
 
-namespace NetInjector
+namespace SexyInject
 {
     public class Container : Context
     {
