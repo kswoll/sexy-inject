@@ -58,6 +58,9 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.Bind<ISomeInterface>().When(_ => false).To<SomeClass1>();
+            registry.Bind<ISomeInterface>().When(_ => true).To<SomeClass2>();
+            var impl = registry.Get<ISomeInterface>();
+            Assert.IsTrue(impl is SomeClass2);
         }
 
         public interface ISimpleClass
