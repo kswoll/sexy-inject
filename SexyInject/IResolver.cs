@@ -1,8 +1,7 @@
 ﻿namespace SexyInject
 {
-    public interface IResolver
+    public interface IResolver<out T>
     {
-        object Instantiate(Request request);
-        void Activate(Request request, object o);
+        T Resolve(ResolverContext context);
     }
 }
