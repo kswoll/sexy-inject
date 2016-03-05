@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SexyInject", "SexyInject\SexyInject.csproj", "{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SexyInject.Tests", "SexyInject.Tests\SexyInject.Tests.csproj", "{4627E1E5-2990-4C8C-A5C1-47D6EC2D39B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4627E1E5-2990-4C8C-A5C1-47D6EC2D39B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4627E1E5-2990-4C8C-A5C1-47D6EC2D39B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4627E1E5-2990-4C8C-A5C1-47D6EC2D39B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4627E1E5-2990-4C8C-A5C1-47D6EC2D39B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

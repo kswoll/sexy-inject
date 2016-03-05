@@ -246,9 +246,7 @@ namespace SexyInject
             return !type.IsPrimitive && !type.IsAbstract && !type.IsInterface && type.GetConstructors().Length > 0;
         }
 
-// ReSharper disable UnusedTypeParameter
         private static class Binding<T>
-// ReSharper restore UnusedTypeParameter
         {
             internal static IResolver resolver;
             internal static IScope scope;
