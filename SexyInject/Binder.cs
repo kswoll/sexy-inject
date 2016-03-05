@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading;
 
@@ -7,12 +7,56 @@ namespace SexyInject
 {
     public class Binder<T> : IBinder
     {
-        private Registry registry;
-        private Lazy<IResolver<T>> resolver = new Lazy<IResolver<T>>(() => new ConstructorResolver<T>(), LazyThreadSafetyMode.ExecutionAndPublication);
+        public Registry Registry { get; }
+
+        private readonly object locker = new object();
+        private readonly ConcurrentQueue<IResolver<T>> resolvers = new ConcurrentQueue<IResolver<T>>();
+        private ConstructorResolver<T> defaultResolver;
+        private int defaultResolverCreated;
 
         public Binder(Registry registry)
         {
-            this.registry = registry;
+            Registry = registry;
+        }
+
+        public void AddResolver(IResolver<T> resolver)
+        {
+            resolvers.Enqueue(resolver);
+        }
+
+        public WhenContext<T> When(Func<ResolverContext, bool> predicate)
+        {
+            return new WhenContext<T>(this, predicate);
+        }
+
+        public T Resolve(ResolverContext context)
+        {
+            bool isResolved;
+            foreach (var resolver in resolvers)
+            {
+                var result = resolver.Resolve(context, out isResolved);
+                if (isResolved)
+                    return result;
+            }
+            if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
+            {
+                lock (locker)
+                {
+                    defaultResolver = new ConstructorResolver<T>();
+                    Interlocked.Exchange(ref defaultResolverCreated, 2);
+                }
+            }
+            return defaultResolver.Resolve(context, out isResolved);
+        }
+
+        object IBinder.Resolve(ResolverContext context)
+        {
+            return Resolve(context);
+        }
+
+        void IBinder.AddResolver(IResolver resolver)
+        {
+            AddResolver((IResolver<T>)resolver);
         }
 
         /// <summary>
@@ -24,17 +68,7 @@ namespace SexyInject
         public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
             where TTarget : class, T
         {
-            resolver = new Lazy<IResolver<T>>(() => new ConstructorResolver<TTarget>(), LazyThreadSafetyMode.ExecutionAndPublication);
-        }
-
-        public T Resolve(ResolverContext context)
-        {
-            return resolver.Value.Resolve(context);
-        }
-
-        object IBinder.Resolve(ResolverContext context)
-        {
-            return Resolve(context);
+            AddResolver(new ConstructorResolver<TTarget>());
         }
     }
 }

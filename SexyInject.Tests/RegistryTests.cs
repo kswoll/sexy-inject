@@ -53,6 +53,13 @@ namespace SexyInject.Tests
             Assert.Throws<ArgumentException>(() => registry.Get<ClassWithoutConstructor>());
         }
 
+        [Test]
+        public void PredicatedResolver()
+        {
+            var registry = new Registry();
+            registry.Bind<ISomeInterface>().When(_ => false).To<SomeClass1>();
+        }
+
         public interface ISimpleClass
         {
         }
@@ -76,6 +83,18 @@ namespace SexyInject.Tests
             private ClassWithoutConstructor()
             {
             }
+        }
+
+        public interface ISomeInterface
+        {
+        }
+
+        public class SomeClass1 : ISomeInterface
+        {
+        }
+
+        public class SomeClass2 : ISomeInterface
+        {
         }
     }
 }

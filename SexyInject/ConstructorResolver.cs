@@ -40,8 +40,9 @@ namespace SexyInject
             this.constructor = lambda.Compile();
         }
 
-        public T Resolve(ResolverContext context)
+        public T Resolve(ResolverContext context, out bool isResolved)
         {
+            isResolved = true;
             return constructor(context);
         }
     }
