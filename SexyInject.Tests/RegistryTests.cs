@@ -116,6 +116,26 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void ResolveLazy()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" });
+            registry
+                .Bind(typeof(Lazy<>))
+                .To((context, targetType) =>
+                {
+                    var returnType = targetType.GetGenericArguments()[0];
+                    var lazytype = typeof(Lazy<>).MakeGenericType(returnType);
+                    var lambdaType = typeof(Func<>).MakeGenericType(returnType);
+                    return Activator.CreateInstance(lazytype, Expression.Lambda(lambdaType, registry.GetExpression(returnType)).Compile());
+                })
+                .Cache((context, targetType) => targetType);
+            var factory = registry.Get<Lazy<SimpleClass>>();
+            var simpleClass = factory.Value;
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
         public void Cache()
         {
             var registry = new Registry();
