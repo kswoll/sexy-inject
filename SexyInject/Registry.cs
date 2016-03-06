@@ -42,7 +42,7 @@ namespace SexyInject
                 }
             }
 
-            return (T)binder.Resolve(CreateResolverContext());
+            return (T)binder.Resolve(CreateResolverContext(), typeof(T));
         }
 
         public object Get(Type type)
@@ -67,7 +67,7 @@ namespace SexyInject
                     binder = Bind(type);
                 }
             }
-            return binder.Resolve(context);
+            return binder.Resolve(context, type);
         }
 
         private bool IsInstantiatable(Type type)

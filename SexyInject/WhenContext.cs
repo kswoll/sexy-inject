@@ -6,9 +6,9 @@ namespace SexyInject
     public class WhenContext 
     {
         public Binder Binder { get; }
-        public Func<ResolverContext, bool> Predicate { get; }
+        public Func<ResolverContext, Type, bool> Predicate { get; }
 
-        public WhenContext(Binder binder, Func<ResolverContext, bool> predicate)
+        public WhenContext(Binder binder, Func<ResolverContext, Type, bool> predicate)
         {
             Binder = binder;
             Predicate = predicate;
@@ -32,15 +32,43 @@ namespace SexyInject
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
         {
-            Binder.AddResolver(new LambdaResolver(x => resolver(x)));
+            Binder.AddResolver(new PredicatedResolver(Predicate, new LambdaResolver((context, targetType) => resolver(context))));
         }        
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function only on the condition that it passes the predicate.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To<TTarget>(Func<ResolverContext, Type, TTarget> resolver)
+        {
+            Binder.AddResolver(new PredicatedResolver(Predicate, new LambdaResolver((context, targetType) => resolver(context, targetType))));
+        }        
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To(Func<ResolverContext, object> resolver)
+        {
+            Binder.AddResolver(new PredicatedResolver(Predicate, new LambdaResolver((x, targetType) => resolver(x))));
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To(Func<ResolverContext, Type, object> resolver)
+        {
+            Binder.AddResolver(new PredicatedResolver(Predicate, new LambdaResolver(resolver)));
+        }
     }
 
     public class WhenContext<T> : WhenContext
     {
         public new Binder<T> Binder => (Binder<T>)base.Binder;
 
-        public WhenContext(Binder<T> binder, Func<ResolverContext, bool> predicate) : base(binder, predicate)
+        public WhenContext(Binder<T> binder, Func<ResolverContext, Type, bool> predicate) : base(binder, predicate)
         {
         }
 
@@ -64,7 +92,18 @@ namespace SexyInject
         public new void To<TTarget>(Func<ResolverContext, TTarget> resolver)
             where TTarget : class, T
         {
-            Binder.AddResolver(new LambdaResolver(resolver));
+            base.To(resolver);
+        }        
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function only on the condition that it passes the predicate.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public new void To<TTarget>(Func<ResolverContext, Type, TTarget> resolver)
+            where TTarget : class, T
+        {
+            base.To(resolver);
         }        
     }
 }

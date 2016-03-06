@@ -11,7 +11,7 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             var binder = new Binder<SimpleClass>(registry);
-            var whenContext = binder.When(x => true);
+            var whenContext = binder.When((x, y) => true);
             Assert.AreEqual(binder, ((WhenContext)whenContext).Binder);
         }
     }

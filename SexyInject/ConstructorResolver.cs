@@ -38,7 +38,7 @@ namespace SexyInject
             this.constructor = lambda.Compile();
         }
 
-        public bool TryResolve(ResolverContext context, out object result)
+        public bool TryResolve(ResolverContext context, Type targetType, out object result)
         {
             result = constructor(context);
             return true;

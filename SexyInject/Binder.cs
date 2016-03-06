@@ -29,12 +29,12 @@ namespace SexyInject
 
         public IEnumerable<IResolver> Resolvers => resolvers;
 
-        public object Resolve(ResolverContext context)
+        public object Resolve(ResolverContext context, Type targetType)
         {
             object result;
             foreach (var resolver in resolvers)
             {
-                if (resolver.TryResolve(context, out result))
+                if (resolver.TryResolve(context, targetType, out result))
                     return result;
             }
             if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
@@ -45,9 +45,12 @@ namespace SexyInject
                     Interlocked.Exchange(ref defaultResolverCreated, 2);
                 }
             }
-            defaultResolver.TryResolve(context, out result);
+            defaultResolver.TryResolve(context, targetType, out result);
             return result;
         }
+
+        public WhenContext When(Func<ResolverContext, Type, bool> predicate) => new WhenContext(this, predicate);
+        public CacheContext Cache(Func<ResolverContext, Type, object> keySelector) => new CacheContext(this, keySelector);
 
         /// <summary>
         /// Binds requests for T to an instance of TTarget.
@@ -67,7 +70,35 @@ namespace SexyInject
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
         {
-            AddResolver(new LambdaResolver(x => resolver(x)));
+            AddResolver(new LambdaResolver((x, targetType) => resolver(x)));
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To<TTarget>(Func<ResolverContext, Type, TTarget> resolver)
+        {
+            AddResolver(new LambdaResolver((x, targetType) => resolver(x, targetType)));
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To(Func<ResolverContext, object> resolver)
+        {
+            AddResolver(new LambdaResolver((x, targetType) => resolver(x)));
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To(Func<ResolverContext, Type, object> resolver)
+        {
+            AddResolver(new LambdaResolver(resolver));
         }
     }
 
@@ -77,7 +108,7 @@ namespace SexyInject
         {
         }
 
-        public WhenContext<T> When(Func<ResolverContext, bool> predicate) => new WhenContext<T>(this, predicate);
+        public new WhenContext<T> When(Func<ResolverContext, Type, bool> predicate) => new WhenContext<T>(this, predicate);
 
         /// <summary>
         /// Binds requests for T to an instance of TTarget.
@@ -97,6 +128,17 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public new void To<TTarget>(Func<ResolverContext, TTarget> resolver)
+            where TTarget : class, T
+        {
+            AddResolver(new LambdaResolver((context, targetType) => resolver(context)));
+        }        
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public new void To<TTarget>(Func<ResolverContext, Type, TTarget> resolver)
             where TTarget : class, T
         {
             AddResolver(new LambdaResolver(resolver));

@@ -59,8 +59,8 @@ namespace SexyInject.Tests
         public void PredicatedResolver()
         {
             var registry = new Registry();
-            registry.Bind<ISomeInterface>().When(_ => false).To<SomeClass1>();
-            registry.Bind<ISomeInterface>().When(_ => true).To<SomeClass2>();
+            registry.Bind<ISomeInterface>().When((x, y) => false).To<SomeClass1>();
+            registry.Bind<ISomeInterface>().When((x, y) => true).To<SomeClass2>();
             var impl = registry.Get<ISomeInterface>();
             Assert.IsTrue(impl is SomeClass2);
         }
@@ -81,6 +81,15 @@ namespace SexyInject.Tests
             registry.Bind(typeof(GenericClass<>)).To(_ => new GenericClass<string> { Property = "1" });
             var impl = registry.Get<GenericClass<string>>();
             Assert.AreEqual("1", impl.Property);
+        }
+
+        [Test]
+        public void ResolveFactory()
+        {
+//            var registry = new Registry();
+//            registry.Bind(typeof(Func<>)).Cache().To((context, targetType) => () => context.Resolve(targetType));
+//            var impl = registry.Get<GenericClass<string>>();
+//            Assert.AreEqual("1", impl.Property);            
         }
     }
 }

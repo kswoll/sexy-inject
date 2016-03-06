@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binder.cs" />
+    <Compile Include="CacheContext.cs" />
     <Compile Include="ConstructorResolver.cs" />
     <Compile Include="ConstructorResolverBindings.cs" />
     <Compile Include="IResolver.cs" />

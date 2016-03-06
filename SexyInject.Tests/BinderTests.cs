@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
 
@@ -27,7 +28,7 @@ namespace SexyInject.Tests
 
         public class TestResolver : IResolver
         {
-            public bool TryResolve(ResolverContext context, out object result)
+            public bool TryResolve(ResolverContext context, Type targetType, out object result)
             {
                 result = new SimpleClass();
                 return true;
