@@ -11,6 +11,6 @@ namespace SexyInject
         /// <param name="targetType"></param>
         /// <param name="result">The object resolved by this resolver.</param>
         /// <returns>True if this resolver successfully resolved the type</returns>
-        bool TryResolve(ResolverContext context, Type targetType, out object result);
+        bool TryResolve(ResolveContext context, Type targetType, out object result);
     }
 }

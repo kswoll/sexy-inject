@@ -3,6 +3,7 @@ using SexyInject.Tests.TestClasses;
 
 namespace SexyInject.Tests
 {
+/*
     [TestFixture]
     public class WhenContextTests
     {
@@ -15,4 +16,5 @@ namespace SexyInject.Tests
             Assert.AreEqual(binder, ((WhenContext)whenContext).Binder);
         }
     }
+*/
 }

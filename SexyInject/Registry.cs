@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace SexyInject
@@ -10,6 +10,7 @@ namespace SexyInject
     {
         public bool AllowImplicitRegistration { get; }
 
+        private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 1);
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
 
         public Registry(bool allowImplicitRegistration = true)
@@ -50,14 +51,19 @@ namespace SexyInject
             return Get(type, CreateResolverContext());
         }
 
-        private ResolverContext CreateResolverContext()
+        public Expression GetExpression(Type type)
         {
-            ResolverContext context = null;
-            context = new ResolverContext(x => Get(x, context));
+            return Expression.Convert(Expression.Call(Expression.Constant(this), getMethod, Expression.Constant(type)), type);
+        }
+
+        private ResolveContext CreateResolverContext()
+        {
+            ResolveContext context = null;
+            context = new ResolveContext(x => Get(x, context));
             return context;
         }
 
-        private object Get(Type type, ResolverContext context)
+        private object Get(Type type, ResolveContext context)
         {
             Binder binder;
             if (!binders.TryGetValue(type, out binder))

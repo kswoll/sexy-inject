@@ -4,16 +4,16 @@ namespace SexyInject
 {
     public class PredicatedResolver : IResolver
     {
-        private readonly Func<ResolverContext, Type, bool> predicate;
         private readonly IResolver resolver;
+        private readonly Func<ResolveContext, Type, bool> predicate;
 
-        public PredicatedResolver(Func<ResolverContext, Type, bool> predicate, IResolver resolver)
+        public PredicatedResolver(IResolver resolver, Func<ResolveContext, Type, bool> predicate)
         {
-            this.predicate = predicate;
             this.resolver = resolver;
+            this.predicate = predicate;
         }
 
-        public bool TryResolve(ResolverContext context, Type targetType, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
             if (predicate(context, targetType))
             {

@@ -11,7 +11,7 @@ namespace SexyInject
     /// </summary>
     public class ConstructorResolver : IResolver
     {
-        private readonly Func<ResolverContext, object> constructor;
+        private readonly Func<ResolveContext, object> constructor;
 
         public ConstructorResolver(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
         {
@@ -22,23 +22,22 @@ namespace SexyInject
                 throw new ArgumentException($"Type {type.FullName} must have at least one public constructor", nameof(type));
 
             var parameters = constructor.GetParameters();
-            var contextParameter = Expression.Parameter(typeof(ResolverContext), "context");
-            var contextResolveMethod = ResolverContext.resolveMethod;
+            var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
 
             // context.TryResolve(arg0Type), context.TryResolve(arg1Type)...
-            var arguments = parameters.Select(x => Expression.Convert(Expression.Call(contextParameter, contextResolveMethod, Expression.Constant(x.ParameterType)), x.ParameterType)).ToArray();
+            var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType), x.ParameterType)).ToArray();
 
             // new T(arguments)
             var body = Expression.New(constructor, arguments);
 
             // context => body
-            var lambda = Expression.Lambda<Func<ResolverContext, object>>(body, contextParameter);
+            var lambda = Expression.Lambda<Func<ResolveContext, object>>(body, contextParameter);
 
             // Compile it into a delegate we can actually invoke
             this.constructor = lambda.Compile();
         }
 
-        public bool TryResolve(ResolverContext context, Type targetType, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
             result = constructor(context);
             return true;

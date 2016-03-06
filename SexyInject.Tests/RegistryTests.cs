@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
 
@@ -59,8 +60,8 @@ namespace SexyInject.Tests
         public void PredicatedResolver()
         {
             var registry = new Registry();
-            registry.Bind<ISomeInterface>().When((x, y) => false).To<SomeClass1>();
-            registry.Bind<ISomeInterface>().When((x, y) => true).To<SomeClass2>();
+            registry.Bind<ISomeInterface>().To<SomeClass1>().When((x, y) => false);
+            registry.Bind<ISomeInterface>().To<SomeClass2>().When((x, y) => true);
             var impl = registry.Get<ISomeInterface>();
             Assert.IsTrue(impl is SomeClass2);
         }
@@ -86,10 +87,25 @@ namespace SexyInject.Tests
         [Test]
         public void ResolveFactory()
         {
-//            var registry = new Registry();
-//            registry.Bind(typeof(Func<>)).Cache().To((context, targetType) => () => context.Resolve(targetType));
-//            var impl = registry.Get<GenericClass<string>>();
-//            Assert.AreEqual("1", impl.Property);            
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" });
+            registry
+                .Bind(typeof(Func<>))
+                .To((context, targetType) => Expression.Lambda(targetType, registry.GetExpression(targetType.GetGenericArguments()[0])).Compile())
+                .Cache((context, targetType) => targetType);
+            var factory = registry.Get<Func<SimpleClass>>();
+            var simpleClass = factory();
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
+        public void Cache()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" }).Cache((context, targetType) => targetType);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+            Assert.AreSame(instance1, instance2);
         }
     }
 }
