@@ -11,10 +11,10 @@ namespace SexyInject
             this.lambda = lambda;
         }
 
-        public object Resolve(ResolverContext context, out bool isResolved)
+        public bool TryResolve(ResolverContext context, out object result)
         {
-            isResolved = true;
-            return lambda(context);
+            result = lambda(context);
+            return true;
         }
     }
 }

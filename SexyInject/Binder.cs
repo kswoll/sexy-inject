@@ -31,11 +31,10 @@ namespace SexyInject
 
         public object Resolve(ResolverContext context)
         {
-            bool isResolved;
+            object result;
             foreach (var resolver in resolvers)
             {
-                var result = resolver.Resolve(context, out isResolved);
-                if (isResolved)
+                if (resolver.TryResolve(context, out result))
                     return result;
             }
             if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
@@ -46,7 +45,8 @@ namespace SexyInject
                     Interlocked.Exchange(ref defaultResolverCreated, 2);
                 }
             }
-            return defaultResolver.Resolve(context, out isResolved);
+            defaultResolver.TryResolve(context, out result);
+            return result;
         }
 
         /// <summary>

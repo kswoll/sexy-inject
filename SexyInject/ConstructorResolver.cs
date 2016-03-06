@@ -9,7 +9,6 @@ namespace SexyInject
     /// Instantiates type T using a particular constructor.  It generates a labda to do this rather than use ConstructorInfo.Invoke
     /// for performance benefits.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ConstructorResolver : IResolver
     {
         private readonly Func<ResolverContext, object> constructor;
@@ -26,7 +25,7 @@ namespace SexyInject
             var contextParameter = Expression.Parameter(typeof(ResolverContext), "context");
             var contextResolveMethod = ResolverContext.resolveMethod;
 
-            // context.Resolve(arg0Type), context.Resolve(arg1Type)...
+            // context.TryResolve(arg0Type), context.TryResolve(arg1Type)...
             var arguments = parameters.Select(x => Expression.Convert(Expression.Call(contextParameter, contextResolveMethod, Expression.Constant(x.ParameterType)), x.ParameterType)).ToArray();
 
             // new T(arguments)
@@ -39,10 +38,10 @@ namespace SexyInject
             this.constructor = lambda.Compile();
         }
 
-        public object Resolve(ResolverContext context, out bool isResolved)
+        public bool TryResolve(ResolverContext context, out object result)
         {
-            isResolved = true;
-            return constructor(context);
+            result = constructor(context);
+            return true;
         }
     }
 }

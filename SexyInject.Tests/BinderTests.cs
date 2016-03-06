@@ -27,10 +27,10 @@ namespace SexyInject.Tests
 
         public class TestResolver : IResolver
         {
-            public object Resolve(ResolverContext context, out bool isResolved)
+            public bool TryResolve(ResolverContext context, out object result)
             {
-                isResolved = true;
-                return new SimpleClass();
+                result = new SimpleClass();
+                return true;
             }
         }
     }

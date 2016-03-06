@@ -13,14 +13,14 @@ namespace SexyInject
             this.resolver = resolver;
         }
 
-        public object Resolve(ResolverContext context, out bool isResolved)
+        public bool TryResolve(ResolverContext context, out object result)
         {
             if (predicate(context))
             {
-                return resolver.Resolve(context, out isResolved);
+                return resolver.TryResolve(context, out result);
             }
-            isResolved = false;
-            return null;
+            result = null;
+            return false;
         }
     }
 }
