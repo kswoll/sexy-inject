@@ -13,6 +13,7 @@ namespace SexyInject.Tests
         public void ImplicitRegistration()
         {
             var registry = new Registry();
+            registry.Bind<object>().To(type => registry.Construct(type));
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass);
         }
@@ -21,6 +22,7 @@ namespace SexyInject.Tests
         public void NonGenericGet()
         {
             var registry = new Registry();
+            registry.Bind<object>().To(type => registry.Construct(type));
             var simpleClass = registry.Get(typeof(SimpleClass));
             Assert.IsTrue(simpleClass is SimpleClass);
         }
@@ -38,14 +40,15 @@ namespace SexyInject.Tests
         public void SimpleInjection()
         {
             var registry = new Registry();
+            registry.Bind<object>().To(type => registry.Construct(type));
             var injectionClass = registry.Get<InjectionClass>();
             Assert.IsNotNull(injectionClass.SimpleClass);
         }
 
         [Test]
-        public void UnregisteredTypeThrowsWhenAllowImplicitRegistrationIsFalse()
+        public void UnregisteredTypeThrows()
         {
-            var registry = new Registry(false);
+            var registry = new Registry();
             Assert.Throws<RegistryException>(() => registry.Get<SimpleClass>());
         }
 
@@ -53,6 +56,7 @@ namespace SexyInject.Tests
         public void ClassWithoutConstructorThrows()
         {
             var registry = new Registry();
+            registry.Bind<object>().To(type => registry.Construct(type));
             Assert.Throws<ArgumentException>(() => registry.Get<ClassWithoutConstructor>());
         }
 
@@ -82,6 +86,19 @@ namespace SexyInject.Tests
             registry.Bind(typeof(GenericClass<>)).To(_ => new GenericClass<string> { Property = "1" });
             var impl = registry.Get<GenericClass<string>>();
             Assert.AreEqual("1", impl.Property);
+        }
+
+        [Test]
+        public void AutoCreateConcreteTypes()
+        {
+            var registry = new Registry();
+            Func<Type, bool> isInstantiatable = type => !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
+            registry.Bind<object>().To(type => registry.Construct(type)).When(isInstantiatable);
+
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+
+            Assert.Throws<RegistryException>(() => registry.Get<ISomeInterface>());
         }
 
         [Test]

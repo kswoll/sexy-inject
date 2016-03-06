@@ -25,7 +25,7 @@ namespace SexyInject
 
         public ResolverContext AddResolver(IResolver resolver)
         {
-            var context = new ResolverContext(this, resolver);
+            var context = new ResolverContext(Registry, this, resolver);
             resolvers.Enqueue(context);
             return context;
         }
@@ -100,6 +100,16 @@ namespace SexyInject
         /// <summary>
         /// Binds requests for T to the result of a lambda function.
         /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public ResolverContext To<TTarget>(Func<Type, object> resolver)
+        {
+            return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));
+        }        
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public ResolverContext To(Func<ResolveContext, Type, object> resolver)
         {
@@ -115,7 +125,7 @@ namespace SexyInject
 
         public new ResolverContext<T> AddResolver(IResolver resolver)
         {
-            var context = new ResolverContext<T>(this, resolver);
+            var context = new ResolverContext<T>(Registry, this, resolver);
             AddResolverContext(context);
             return context;
         }
@@ -137,10 +147,10 @@ namespace SexyInject
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public new ResolverContext<T> To<TTarget>(Func<ResolveContext, TTarget> resolver)
+        public ResolverContext<T> To<TTarget>(Func<Type, TTarget> resolver)
             where TTarget : class, T
         {
-            return AddResolver(new LambdaResolver((context, targetType) => resolver(context)));
+            return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));
         }        
 
         /// <summary>

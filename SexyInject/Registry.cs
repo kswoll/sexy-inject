@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,16 +9,9 @@ namespace SexyInject
 {
     public class Registry
     {
-        public bool AllowImplicitRegistration { get; }
-
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 1);
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
         private readonly ConcurrentDictionary<Type, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object>>();
-
-        public Registry(bool allowImplicitRegistration = true)
-        {
-            AllowImplicitRegistration = allowImplicitRegistration;
-        }
 
         public Binder<T> Bind<T>()
         {
@@ -31,20 +25,7 @@ namespace SexyInject
 
         public T Get<T>()
         {
-            Binder binder;
-            if (!binders.TryGetValue(typeof(T), out binder))
-            {
-                var isGenericBinding = typeof(T).IsGenericType && binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder);
-                if (!isGenericBinding)
-                {
-                    if (AllowImplicitRegistration && IsInstantiatable(typeof(T)))
-                        binder = Bind<T>();
-                    else if (!typeof(T).IsGenericType || !binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder))
-                        throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");                    
-                }
-            }
-
-            return (T)binder.Resolve(CreateResolverContext(), typeof(T));
+            return (T)Get(typeof(T), CreateResolverContext());
         }
 
         public object Get(Type type)
@@ -81,20 +62,16 @@ namespace SexyInject
 
         private object Get(Type type, ResolveContext context)
         {
-            Binder binder;
-            if (!binders.TryGetValue(type, out binder))
+            Binder binder = null;
+            foreach (var current in EnumerateBaseTypes(type))
             {
-                if (AllowImplicitRegistration)
-                {
-                    binder = Bind(type);
-                }
+                if (binders.TryGetValue(current, out binder))
+                    break;
             }
-            return binder.Resolve(context, type);
-        }
+            if (binder == null)
+                throw new RegistryException($"The type {type.FullName} has not been registered and AllowImplicitRegistration is disabled.");
 
-        private bool IsInstantiatable(Type type)
-        {
-            return !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
+            return binder.Resolve(context, type);
         }
 
         private Func<ResolveContext, object> FactoryGenerator(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
@@ -119,6 +96,26 @@ namespace SexyInject
 
             // Compile it into a delegate we can actually invoke
             return lambda.Compile();
+        }
+
+        private IEnumerable<Type> EnumerateBaseTypes(Type type)
+        {
+            var current = type;
+            while (current != null)
+            {
+                yield return current;
+
+                if (current.IsGenericType)
+                    yield return current.GetGenericTypeDefinition();
+
+                current = current.BaseType;
+            }
+            foreach (var @interface in type.GetInterfaces())
+            {
+                yield return @interface;
+                if (@interface.IsGenericType)
+                    yield return @interface.GetGenericTypeDefinition();
+            }
         }
     }
 }
