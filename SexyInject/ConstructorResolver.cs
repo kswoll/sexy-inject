@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace SexyInject
@@ -11,35 +10,18 @@ namespace SexyInject
     /// </summary>
     public class ConstructorResolver : IResolver
     {
-        private readonly Func<ResolveContext, object> constructor;
+        private readonly Type type;
+        private readonly Func<ConstructorInfo[], ConstructorInfo> constructorSelector;
 
         public ConstructorResolver(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
         {
-            constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
-
-            var constructor = constructorSelector(type.GetConstructors());
-            if (constructor == null)
-                throw new ArgumentException($"Type {type.FullName} must have at least one public constructor", nameof(type));
-
-            var parameters = constructor.GetParameters();
-            var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
-
-            // context.TryResolve(arg0Type), context.TryResolve(arg1Type)...
-            var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType), x.ParameterType)).ToArray();
-
-            // new T(arguments)
-            var body = Expression.New(constructor, arguments);
-
-            // context => body
-            var lambda = Expression.Lambda<Func<ResolveContext, object>>(body, contextParameter);
-
-            // Compile it into a delegate we can actually invoke
-            this.constructor = lambda.Compile();
+            this.type = type;
+            this.constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
         }
 
         public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
-            result = constructor(context);
+            result = context.Construct(type, constructorSelector);
             return true;
         }
     }
