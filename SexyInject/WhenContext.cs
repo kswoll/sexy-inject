@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace SexyInject
 {
-    public struct WhenContext : IWhenContext
+    public class WhenContext 
     {
         public Binder Binder { get; }
         public Func<ResolverContext, bool> Predicate { get; }
@@ -13,8 +13,6 @@ namespace SexyInject
             Binder = binder;
             Predicate = predicate;
         }
-
-        IBinder IWhenContext.Binder => Binder;
 
         /// <summary>
         /// Binds requests for T to an instance of TTarget only on the condition that it passes the predicate.
@@ -38,18 +36,13 @@ namespace SexyInject
         }        
     }
 
-    public struct WhenContext<T> : IWhenContext
+    public class WhenContext<T> : WhenContext
     {
-        public Binder<T> Binder { get; }
-        public Func<ResolverContext, bool> Predicate { get; }
+        public new Binder<T> Binder => (Binder<T>)base.Binder;
 
-        public WhenContext(Binder<T> binder, Func<ResolverContext, bool> predicate)
+        public WhenContext(Binder<T> binder, Func<ResolverContext, bool> predicate) : base(binder, predicate)
         {
-            Binder = binder;
-            Predicate = predicate;
         }
-
-        IBinder IWhenContext.Binder => Binder;
 
         /// <summary>
         /// Binds requests for T to an instance of TTarget only on the condition that it passes the predicate.
@@ -57,10 +50,10 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public new void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
             where TTarget : class, T
         {
-            Binder.AddResolver(new PredicatedResolver(Predicate, new ConstructorResolver(typeof(TTarget), constructorSelector)));
+            base.To<TTarget>(constructorSelector);
         }
 
         /// <summary>
@@ -68,7 +61,7 @@ namespace SexyInject
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
+        public new void To<TTarget>(Func<ResolverContext, TTarget> resolver)
             where TTarget : class, T
         {
             Binder.AddResolver(new LambdaResolver(resolver));

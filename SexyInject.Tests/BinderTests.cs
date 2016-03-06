@@ -8,12 +8,12 @@ namespace SexyInject.Tests
     public class BinderTests
     {
         [Test]
-        public void AddResolverThroughInterface()
+        public void AddResolverThroughBaseType()
         {
             var registry = new Registry();
-            var binder = new Binder<SimpleClass>(registry);
+            Binder binder = new Binder<SimpleClass>(registry);
             var resolver = new TestResolver();
-            ((IBinder)binder).AddResolver(resolver);
+            binder.AddResolver(resolver);
             Assert.IsTrue(binder.Resolvers.Contains(resolver));
         }
 

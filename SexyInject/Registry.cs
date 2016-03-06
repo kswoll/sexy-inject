@@ -10,7 +10,7 @@ namespace SexyInject
     {
         public bool AllowImplicitRegistration { get; }
 
-        private readonly ConcurrentDictionary<Type, IBinder> binders = new ConcurrentDictionary<Type, IBinder>();
+        private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
 
         public Registry(bool allowImplicitRegistration = true)
         {
@@ -22,14 +22,14 @@ namespace SexyInject
             return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>(this));
         }
 
-        public IBinder Bind(Type type)
+        public Binder Bind(Type type)
         {
             return binders.GetOrAdd(type, x => new Binder(this, type));
         }
 
         public T Get<T>()
         {
-            IBinder binder;
+            Binder binder;
             if (!binders.TryGetValue(typeof(T), out binder))
             {
                 var isGenericBinding = typeof(T).IsGenericType && binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder);
@@ -59,7 +59,7 @@ namespace SexyInject
 
         private object Get(Type type, ResolverContext context)
         {
-            IBinder binder;
+            Binder binder;
             if (!binders.TryGetValue(type, out binder))
             {
                 if (AllowImplicitRegistration)

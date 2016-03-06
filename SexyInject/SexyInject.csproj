@@ -42,9 +42,7 @@
     <Compile Include="Binder.cs" />
     <Compile Include="ConstructorResolver.cs" />
     <Compile Include="ConstructorResolverBindings.cs" />
-    <Compile Include="IBinder.cs" />
     <Compile Include="IResolver.cs" />
-    <Compile Include="IWhenContext.cs" />
     <Compile Include="LambdaResolver.cs" />
     <Compile Include="PredicatedResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

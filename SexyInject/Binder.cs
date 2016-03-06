@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace SexyInject
 {
-    public class Binder : IBinder
+    public class Binder 
     {
         public Registry Registry { get; }
         public Type Type { get; }
@@ -49,7 +49,26 @@ namespace SexyInject
             return defaultResolver.Resolve(context, out isResolved);
         }
 
-        void IBinder.To<TTarget>(Func<ResolverContext, TTarget> resolver) => AddResolver(new LambdaResolver(x => resolver(x)));
+        /// <summary>
+        /// Binds requests for T to an instance of TTarget.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
+        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
+        /// results in the selection of the first constructor with the most number of parameters.</param>
+        public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        {
+            AddResolver(new ConstructorResolver(typeof(TTarget)));
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
+        {
+            AddResolver(new LambdaResolver(x => resolver(x)));
+        }
     }
 
     public class Binder<T> : Binder
@@ -66,7 +85,7 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public new void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
             where TTarget : class, T
         {
             AddResolver(new ConstructorResolver(typeof(TTarget)));
@@ -77,7 +96,7 @@ namespace SexyInject
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
+        public new void To<TTarget>(Func<ResolverContext, TTarget> resolver)
             where TTarget : class, T
         {
             AddResolver(new LambdaResolver(resolver));
