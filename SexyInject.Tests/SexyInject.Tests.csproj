@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="BinderTests.cs" />
     <Compile Include="TestClasses\BaseClass.cs" />
+    <Compile Include="TestClasses\GenericClass.cs" />
     <Compile Include="TestClasses\ISimpleClass.cs" />
     <Compile Include="TestClasses\SimpleClass.cs" />
     <Compile Include="TestClasses\InjectionClass.cs" />

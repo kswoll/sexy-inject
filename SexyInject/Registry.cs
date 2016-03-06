@@ -10,7 +10,6 @@ namespace SexyInject
     {
         public bool AllowImplicitRegistration { get; }
 
-        private static readonly MethodInfo genericBindMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Bind) && x.GetParameters().Length == 0);
         private readonly ConcurrentDictionary<Type, IBinder> binders = new ConcurrentDictionary<Type, IBinder>();
 
         public Registry(bool allowImplicitRegistration = true)
@@ -25,7 +24,7 @@ namespace SexyInject
 
         public IBinder Bind(Type type)
         {
-            return (IBinder)genericBindMethod.MakeGenericMethod(type).Invoke(this, new object[0]);
+            return binders.GetOrAdd(type, x => new Binder(this, type));
         }
 
         public T Get<T>()
@@ -33,10 +32,14 @@ namespace SexyInject
             IBinder binder;
             if (!binders.TryGetValue(typeof(T), out binder))
             {
-                if (AllowImplicitRegistration && IsInstantiatable(typeof(T)))
-                    binder = Bind<T>();
-                else if (!typeof(T).IsGenericType || !binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder))
-                    throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
+                var isGenericBinding = typeof(T).IsGenericType && binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder);
+                if (!isGenericBinding)
+                {
+                    if (AllowImplicitRegistration && IsInstantiatable(typeof(T)))
+                        binder = Bind<T>();
+                    else if (!typeof(T).IsGenericType || !binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder))
+                        throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");                    
+                }
             }
 
             return (T)binder.Resolve(CreateResolverContext());

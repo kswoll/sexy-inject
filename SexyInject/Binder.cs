@@ -6,33 +6,30 @@ using System.Threading;
 
 namespace SexyInject
 {
-    public class Binder<T> : IBinder
+    public class Binder : IBinder
     {
         public Registry Registry { get; }
+        public Type Type { get; }
 
         private readonly object locker = new object();
-        private readonly ConcurrentQueue<IResolver<T>> resolvers = new ConcurrentQueue<IResolver<T>>();
-        private ConstructorResolver<T> defaultResolver;
+        private readonly ConcurrentQueue<IResolver> resolvers = new ConcurrentQueue<IResolver>();
+        private ConstructorResolver defaultResolver;
         private int defaultResolverCreated;
 
-        public Binder(Registry registry)
+        public Binder(Registry registry, Type type)
         {
             Registry = registry;
+            Type = type;
         }
 
-        public void AddResolver(IResolver<T> resolver)
+        public void AddResolver(IResolver resolver)
         {
             resolvers.Enqueue(resolver);
         }
 
-        public IEnumerable<IResolver<T>> Resolvers => resolvers;
+        public IEnumerable<IResolver> Resolvers => resolvers;
 
-        public WhenContext<T> When(Func<ResolverContext, bool> predicate)
-        {
-            return new WhenContext<T>(this, predicate);
-        }
-
-        public T Resolve(ResolverContext context)
+        public object Resolve(ResolverContext context)
         {
             bool isResolved;
             foreach (var resolver in resolvers)
@@ -45,22 +42,23 @@ namespace SexyInject
             {
                 lock (locker)
                 {
-                    defaultResolver = new ConstructorResolver<T>();
+                    defaultResolver = new ConstructorResolver(Type);
                     Interlocked.Exchange(ref defaultResolverCreated, 2);
                 }
             }
             return defaultResolver.Resolve(context, out isResolved);
         }
 
-        object IBinder.Resolve(ResolverContext context)
+        void IBinder.To<TTarget>(Func<ResolverContext, TTarget> resolver) => AddResolver(new LambdaResolver(x => resolver(x)));
+    }
+
+    public class Binder<T> : Binder
+    {
+        public Binder(Registry registry) : base(registry, typeof(T))
         {
-            return Resolve(context);
         }
 
-        void IBinder.AddResolver(IResolver resolver)
-        {
-            AddResolver((IResolver<T>)resolver);
-        }
+        public WhenContext<T> When(Func<ResolverContext, bool> predicate) => new WhenContext<T>(this, predicate);
 
         /// <summary>
         /// Binds requests for T to an instance of TTarget.
@@ -71,7 +69,7 @@ namespace SexyInject
         public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
             where TTarget : class, T
         {
-            AddResolver(new ConstructorResolver<TTarget>());
+            AddResolver(new ConstructorResolver(typeof(TTarget)));
         }
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace SexyInject
         public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
             where TTarget : class, T
         {
-            AddResolver(new LambdaResolver<TTarget>(resolver));
-        }
+            AddResolver(new LambdaResolver(resolver));
+        }        
     }
 }

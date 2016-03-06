@@ -25,9 +25,9 @@ namespace SexyInject.Tests
             Assert.AreEqual(registry, binder.Registry);
         }
 
-        public class TestResolver : IResolver<SimpleClass>
+        public class TestResolver : IResolver
         {
-            public SimpleClass Resolve(ResolverContext context, out bool isResolved)
+            public object Resolve(ResolverContext context, out bool isResolved)
             {
                 isResolved = true;
                 return new SimpleClass();

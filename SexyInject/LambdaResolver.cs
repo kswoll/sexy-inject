@@ -2,16 +2,16 @@
 
 namespace SexyInject
 {
-    public class LambdaResolver<TTarget> : IResolver<TTarget>
+    public class LambdaResolver : IResolver
     {
-        private readonly Func<ResolverContext, TTarget> lambda;
+        private readonly Func<ResolverContext, object> lambda;
 
-        public LambdaResolver(Func<ResolverContext, TTarget> lambda)
+        public LambdaResolver(Func<ResolverContext, object> lambda)
         {
             this.lambda = lambda;
         }
 
-        public TTarget Resolve(ResolverContext context, out bool isResolved)
+        public object Resolve(ResolverContext context, out bool isResolved)
         {
             isResolved = true;
             return lambda(context);

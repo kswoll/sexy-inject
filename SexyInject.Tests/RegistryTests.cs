@@ -78,9 +78,9 @@ namespace SexyInject.Tests
         public void ResolveByGenericTypeDefinition()
         {
             var registry = new Registry();
-            registry.Bind(typeof(List<>)).To(_ => new List<string> { "1" });
-            var impl = registry.Get<List<string>>();
-            Assert.AreEqual("1", impl[0]);            
+            registry.Bind(typeof(GenericClass<>)).To(_ => new GenericClass<string> { Property = "1" });
+            var impl = registry.Get<GenericClass<string>>();
+            Assert.AreEqual("1", impl.Property);
         }
     }
 }

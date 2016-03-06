@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
 
 namespace SexyInject
 {
@@ -11,17 +10,17 @@ namespace SexyInject
     /// for performance benefits.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ConstructorResolver<T> : IResolver<T>
+    public class ConstructorResolver : IResolver
     {
-        private readonly Func<ResolverContext, T> constructor;
+        private readonly Func<ResolverContext, object> constructor;
 
-        public ConstructorResolver(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public ConstructorResolver(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
         {
             constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
 
-            var constructor = constructorSelector(typeof(T).GetConstructors());
+            var constructor = constructorSelector(type.GetConstructors());
             if (constructor == null)
-                throw new ArgumentException($"Type {typeof(T).FullName} must have at least one public constructor", nameof(T));
+                throw new ArgumentException($"Type {type.FullName} must have at least one public constructor", nameof(type));
 
             var parameters = constructor.GetParameters();
             var contextParameter = Expression.Parameter(typeof(ResolverContext), "context");
@@ -34,13 +33,13 @@ namespace SexyInject
             var body = Expression.New(constructor, arguments);
 
             // context => body
-            var lambda = Expression.Lambda<Func<ResolverContext, T>>(body, contextParameter);
+            var lambda = Expression.Lambda<Func<ResolverContext, object>>(body, contextParameter);
 
             // Compile it into a delegate we can actually invoke
             this.constructor = lambda.Compile();
         }
 
-        public T Resolve(ResolverContext context, out bool isResolved)
+        public object Resolve(ResolverContext context, out bool isResolved)
         {
             isResolved = true;
             return constructor(context);
