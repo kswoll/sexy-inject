@@ -151,5 +151,14 @@ namespace SexyInject.Tests
             var value = registry.Get<int>();
             Assert.AreEqual(5, value);
         }
+
+        [Test]
+        public void MultipleInjectionOfSameTypeResultsInOneInstance()
+        {
+            var registry = new Registry();
+            registry.Bind<object>().To((context, type) => context.Construct(type));
+            var obj = registry.Get<ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass>();
+            Assert.AreSame(obj.SimpleClass, obj.ClassWithDependencyOnSimpleClass.SimpleClass);
+        }
     }
 }

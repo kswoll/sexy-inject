@@ -21,7 +21,13 @@ namespace SexyInject
 
         public object Resolve(Type type)
         {
-            return resolver(type);
+            object result;
+            if (!cache.TryGetValue(type, out result))
+            {
+                result = resolver(type);
+                cache[type] = result;
+            }
+            return result;
         }
 
         public static MethodCallExpression ResolveExpression(Expression resolveContext, Type type)
