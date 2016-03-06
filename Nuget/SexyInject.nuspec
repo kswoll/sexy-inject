@@ -1,16 +1,16 @@
 
 <package>
   <metadata>
-    <id>NetInjector</id>
+    <id>SexyInject</id>
     <version>1.0.0</version>
     <authors>kirk</authors>
     <owners>kirk</owners>
-    <projectUrl>https://github.com/kswoll/netinjector</projectUrl>
+    <projectUrl>https://github.com/kswoll/sexy-inject</projectUrl>
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
 	  <releaseNotes>Initial commit</releaseNotes>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Another .NET dependency injection framework</description>
-    <copyright>Copyright 2015</copyright>
+    <description>A sexier .NET dependency injection framework</description>
+    <copyright>Copyright 2016</copyright>
     <tags>dependency injection</tags>
   </metadata>
 </package>
