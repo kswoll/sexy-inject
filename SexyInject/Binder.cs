@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -23,6 +24,8 @@ namespace SexyInject
         {
             resolvers.Enqueue(resolver);
         }
+
+        public IEnumerable<IResolver<T>> Resolvers => resolvers;
 
         public WhenContext<T> When(Func<ResolverContext, bool> predicate)
         {
@@ -62,13 +65,24 @@ namespace SexyInject
         /// <summary>
         /// Binds requests for T to an instance of TTarget.
         /// </summary>
-        /// <typeparam name="TTarget">The subclass of T to instantiate when an instance of T is requested.</typeparam>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
         public void To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
             where TTarget : class, T
         {
             AddResolver(new ConstructorResolver<TTarget>());
+        }
+
+        /// <summary>
+        /// Binds requests for T to the result of a lambda function.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
+        public void To<TTarget>(Func<ResolverContext, TTarget> resolver)
+            where TTarget : class, T
+        {
+            AddResolver(new LambdaResolver<TTarget>(resolver));
         }
     }
 }

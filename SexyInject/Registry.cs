@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace SexyInject
 {
@@ -7,6 +10,7 @@ namespace SexyInject
     {
         public bool AllowImplicitRegistration { get; }
 
+        private static readonly MethodInfo genericBindMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Bind) && x.GetParameters().Length == 0);
         private readonly ConcurrentDictionary<Type, IBinder> binders = new ConcurrentDictionary<Type, IBinder>();
 
         public Registry(bool allowImplicitRegistration = true)
@@ -21,23 +25,26 @@ namespace SexyInject
 
         public IBinder Bind(Type type)
         {
-            return binders.GetOrAdd(type, x => (IBinder)Activator.CreateInstance(typeof(Binder<>).MakeGenericType(type), this));
+            return (IBinder)genericBindMethod.MakeGenericMethod(type).Invoke(this, new object[0]);
         }
 
         public T Get<T>()
         {
-            IBinder binder;
-            if (!binders.TryGetValue(typeof(T), out binder))
+            IBinder binder = null;
+            foreach (var type in EnumerateBaseTypes(typeof(T)))
             {
-                if (AllowImplicitRegistration)
+                if (binders.TryGetValue(type, out binder))
+                    break;
+
+                if (AllowImplicitRegistration && IsInstantiatable(type))
                 {
                     binder = Bind<T>();
-                }
-                else
-                {
-                    throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
+                    break;
                 }
             }
+            if (binder == null)
+                throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
+
             return (T)binder.Resolve(CreateResolverContext());
         }
 
@@ -64,6 +71,25 @@ namespace SexyInject
                 }
             }
             return binder.Resolve(context);
+        }
+
+        private bool IsInstantiatable(Type type)
+        {
+            return !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
+        }
+
+        private IEnumerable<Type> EnumerateBaseTypes(Type type)
+        {
+            Type current = type;
+            while (current != null)
+            {
+                yield return current;
+                current = current.BaseType;
+            }
+            foreach (var @interface in type.GetInterfaces())
+            {
+                yield return @interface;
+            }
         }
     }
 }

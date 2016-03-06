@@ -44,8 +44,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinderTests.cs" />
+    <Compile Include="TestClasses\BaseClass.cs" />
+    <Compile Include="TestClasses\ISimpleClass.cs" />
+    <Compile Include="TestClasses\SimpleClass.cs" />
+    <Compile Include="TestClasses\InjectionClass.cs" />
+    <Compile Include="TestClasses\ClassWithoutConstructor.cs" />
+    <Compile Include="TestClasses\SomeClass1.cs" />
+    <Compile Include="TestClasses\SomeClass2.cs" />
+    <Compile Include="TestClasses\ISomeInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistryTests.cs" />
+    <Compile Include="TestClasses\SubClass.cs" />
+    <Compile Include="WhenContextTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

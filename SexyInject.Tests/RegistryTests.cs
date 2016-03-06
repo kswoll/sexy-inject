@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using SexyInject.Tests.TestClasses;
 
 namespace SexyInject.Tests
 {
@@ -63,41 +64,22 @@ namespace SexyInject.Tests
             Assert.IsTrue(impl is SomeClass2);
         }
 
-        public interface ISimpleClass
+        [Test]
+        public void LambdaResolver()
         {
+            var registry = new Registry();
+            registry.Bind<ISomeInterface>().To(_ => new SomeClass1());
+            var impl = registry.Get<ISomeInterface>();
+            Assert.IsTrue(impl is SomeClass1);
         }
 
-        public class SimpleClass : ISimpleClass
+        [Test]
+        public void ResolveByBaseClass()
         {
-        }
-
-        public class InjectionClass
-        {
-            public SimpleClass SimpleClass { get; }
-
-            public InjectionClass(SimpleClass simpleClass)
-            {
-                SimpleClass = simpleClass;
-            }
-        }
-
-        public class ClassWithoutConstructor
-        {
-            private ClassWithoutConstructor()
-            {
-            }
-        }
-
-        public interface ISomeInterface
-        {
-        }
-
-        public class SomeClass1 : ISomeInterface
-        {
-        }
-
-        public class SomeClass2 : ISomeInterface
-        {
+            var registry = new Registry();
+            registry.Bind<ISomeInterface>().To(_ => new SomeClass1());
+            var impl = registry.Get<SomeClass1>();
+            Assert.IsNotNull(impl);            
         }
     }
 }
