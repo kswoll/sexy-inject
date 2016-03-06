@@ -26,13 +26,50 @@ namespace SexyInject.Tests
             Assert.AreEqual(registry, binder.Registry);
         }
 
-        public class TestResolver : IResolver
+        [Test]
+        public void TypeProperty()
         {
-            public bool TryResolve(ResolveContext context, Type targetType, out object result)
-            {
-                result = new SimpleClass();
-                return true;
-            }
+            var binder = new Binder(new Registry(), typeof(string));
+            Assert.AreEqual(typeof(string), binder.Type);
+        }
+
+        [Test]
+        public void DefaultResolver()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>();
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
+        public void BaseBinderToWithContextAndType()
+        {
+            var registry = new Registry();
+            Binder binder = registry.Bind<SimpleClass>();
+            binder.To((context, type) => new SimpleClass());
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
+        public void BinderToWithContextAndType()
+        {
+            var registry = new Registry();
+            var binder = registry.Bind<SimpleClass>();
+            binder.To((context, type) => new SimpleClass());
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
+        public void BaseBinderConstructor()
+        {
+            var registry = new Registry();
+            Binder binder = registry.Bind<SimpleClass>();
+            binder.To<SimpleClass>();
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
         }
     }
 }

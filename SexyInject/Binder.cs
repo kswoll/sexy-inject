@@ -73,16 +73,6 @@ namespace SexyInject
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public ResolverContext To<TTarget>(Func<ResolveContext, TTarget> resolver)
-        {
-            return AddResolver(new LambdaResolver((x, targetType) => resolver(x)));
-        }
-
-        /// <summary>
-        /// Binds requests for T to the result of a lambda function.
-        /// </summary>
-        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
-        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public ResolverContext To<TTarget>(Func<ResolveContext, Type, TTarget> resolver)
         {
             return AddResolver(new LambdaResolver((x, targetType) => resolver(x, targetType)));
@@ -91,30 +81,12 @@ namespace SexyInject
         /// <summary>
         /// Binds requests for T to the result of a lambda function.
         /// </summary>
-        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public ResolverContext To(Func<ResolveContext, object> resolver)
-        {
-            return AddResolver(new LambdaResolver((x, targetType) => resolver(x)));
-        }
-
-        /// <summary>
-        /// Binds requests for T to the result of a lambda function.
-        /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public ResolverContext To<TTarget>(Func<Type, object> resolver)
+        public ResolverContext To<TTarget>(Func<Type, TTarget> resolver)
         {
             return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));
         }        
-
-        /// <summary>
-        /// Binds requests for T to the result of a lambda function.
-        /// </summary>
-        /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public ResolverContext To(Func<ResolveContext, Type, object> resolver)
-        {
-            return AddResolver(new LambdaResolver(resolver));
-        }
     }
 
     public class Binder<T> : Binder
@@ -147,7 +119,7 @@ namespace SexyInject
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
-        public ResolverContext<T> To<TTarget>(Func<Type, TTarget> resolver)
+        public new ResolverContext<T> To<TTarget>(Func<Type, TTarget> resolver)
             where TTarget : class, T
         {
             return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));

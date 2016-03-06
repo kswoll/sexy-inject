@@ -34,7 +34,7 @@ namespace SexyInject
             return constructor(this, type, constructorSelector);
         }
 
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
         {
             return (T)constructor(this, typeof(T), constructorSelector);
         }

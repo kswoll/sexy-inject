@@ -124,5 +124,23 @@ namespace SexyInject.Tests
             var instance2 = registry.Get<SimpleClass>();
             Assert.AreSame(instance1, instance2);
         }
+
+        [Test]
+        public void Construct()
+        {
+            var registry = new Registry();
+            registry.Bind<object>().To(type => registry.Construct(type));
+            var simpleClass = registry.Construct<SimpleClass>();
+            Assert.IsNotNull(simpleClass);           
+        }
+
+        [Test]
+        public void ResolveByGenericTypeDefinitionOnInterface()
+        {
+            var registry = new Registry();
+            registry.Bind(typeof(IGenericInterface<>)).To(_ => new ConstructedGenericClass());
+            var impl = registry.Get<ConstructedGenericClass>();
+            Assert.IsNotNull(impl);
+        }
     }
 }
