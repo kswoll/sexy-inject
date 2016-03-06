@@ -30,20 +30,14 @@ namespace SexyInject
 
         public T Get<T>()
         {
-            IBinder binder = null;
-            foreach (var type in EnumerateBaseTypes(typeof(T)))
+            IBinder binder;
+            if (!binders.TryGetValue(typeof(T), out binder))
             {
-                if (binders.TryGetValue(type, out binder))
-                    break;
-
-                if (AllowImplicitRegistration && IsInstantiatable(type))
-                {
+                if (AllowImplicitRegistration && IsInstantiatable(typeof(T)))
                     binder = Bind<T>();
-                    break;
-                }
+                else if (!typeof(T).IsGenericType || !binders.TryGetValue(typeof(T).GetGenericTypeDefinition(), out binder))
+                    throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
             }
-            if (binder == null)
-                throw new RegistryException($"The type {typeof(T).FullName} has not been registered and AllowImplicitRegistration is disabled.");
 
             return (T)binder.Resolve(CreateResolverContext());
         }
@@ -76,20 +70,6 @@ namespace SexyInject
         private bool IsInstantiatable(Type type)
         {
             return !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
-        }
-
-        private IEnumerable<Type> EnumerateBaseTypes(Type type)
-        {
-            Type current = type;
-            while (current != null)
-            {
-                yield return current;
-                current = current.BaseType;
-            }
-            foreach (var @interface in type.GetInterfaces())
-            {
-                yield return @interface;
-            }
         }
     }
 }

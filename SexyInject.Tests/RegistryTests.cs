@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
 
@@ -74,12 +75,12 @@ namespace SexyInject.Tests
         }
 
         [Test]
-        public void ResolveByBaseClass()
+        public void ResolveByGenericTypeDefinition()
         {
             var registry = new Registry();
-            registry.Bind<ISomeInterface>().To(_ => new SomeClass1());
-            var impl = registry.Get<SomeClass1>();
-            Assert.IsNotNull(impl);            
+            registry.Bind(typeof(List<>)).To(_ => new List<string> { "1" });
+            var impl = registry.Get<List<string>>();
+            Assert.AreEqual("1", impl[0]);            
         }
     }
 }
