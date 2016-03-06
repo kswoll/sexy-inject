@@ -142,5 +142,14 @@ namespace SexyInject.Tests
             var impl = registry.Get<ConstructedGenericClass>();
             Assert.IsNotNull(impl);
         }
+
+        [Test]
+        public void CatchAllForValueType()
+        {
+            var registry = new Registry();
+            registry.Bind(typeof(object)).To(x => 5);
+            var value = registry.Get<int>();
+            Assert.AreEqual(5, value);
+        }
     }
 }
