@@ -7,14 +7,17 @@ namespace SexyInject
 {
     public class ResolveContext
     {
+        public Registry Registry { get; }
+
         private readonly Dictionary<Type, object> cache = new Dictionary<Type, object>();
         private readonly Func<Type, object> resolver;
         private readonly Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor;
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethod(nameof(Resolve));
 
-        public ResolveContext(Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor, object[] arguments)
+        public ResolveContext(Registry registry, Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor, object[] arguments)
         {
+            Registry = registry;
             this.resolver = resolver;
             this.constructor = constructor;
 
@@ -35,7 +38,8 @@ namespace SexyInject
             if (!cache.TryGetValue(type, out result))
             {
                 result = resolver(type);
-                cache[type] = result;
+                if (Registry.Bind(type).CachePolicy == CachePolicy.Transient) 
+                    cache[type] = result;
             }
             return result;
         }

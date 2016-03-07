@@ -13,14 +13,14 @@ namespace SexyInject
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
         private readonly ConcurrentDictionary<Type, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object>>();
 
-        public Binder<T> Bind<T>()
+        public Binder<T> Bind<T>(CachePolicy cachePolicy = CachePolicy.Transient)
         {
-            return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>(this));
+            return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>(this, cachePolicy));
         }
 
-        public Binder Bind(Type type)
+        public Binder Bind(Type type, CachePolicy cachePolicy = CachePolicy.Transient)
         {
-            return binders.GetOrAdd(type, x => new Binder(this, type));
+            return binders.GetOrAdd(type, x => new Binder(this, type, cachePolicy));
         }
 
         public T Get<T>(params object[] arguments)
@@ -61,7 +61,7 @@ namespace SexyInject
         private ResolveContext CreateResolverContext(object[] arguments)
         {
             ResolveContext context = null;
-            context = new ResolveContext(x => Get(x, context), Construct, arguments);
+            context = new ResolveContext(this, x => Get(x, context), Construct, arguments);
             return context;
         }
 

@@ -11,16 +11,18 @@ namespace SexyInject
     {
         public Registry Registry { get; }
         public Type Type { get; }
+        public CachePolicy CachePolicy { get; }
 
         private readonly object locker = new object();
         private readonly ConcurrentQueue<ResolverContext> resolvers = new ConcurrentQueue<ResolverContext>();
         private ConstructorResolver defaultResolver;
         private int defaultResolverCreated;
 
-        public Binder(Registry registry, Type type)
+        public Binder(Registry registry, Type type, CachePolicy cachePolicy)
         {
             Registry = registry;
             Type = type;
+            CachePolicy = cachePolicy;
         }
 
         public ResolverContext AddResolver(IResolver resolver)
@@ -90,11 +92,21 @@ namespace SexyInject
         {
             return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));
         }        
+
+        /// <summary>
+        /// Binds requests for T to a specific instance
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="instance">The singleton instance to always return when type T is requested.</param>
+        public ResolverContext To<TTarget>(TTarget instance)
+        {
+            return AddResolver(new LambdaResolver((context, type) => instance));
+        }        
     }
 
     public class Binder<T> : Binder
     {
-        public Binder(Registry registry) : base(registry, typeof(T))
+        public Binder(Registry registry, CachePolicy cachePolicy) : base(registry, typeof(T), cachePolicy)
         {
         }
 
@@ -137,6 +149,17 @@ namespace SexyInject
             where TTarget : class, T
         {
             return AddResolver(new LambdaResolver(resolver));
+        }
+
+        /// <summary>
+        /// Binds requests for T to a specific instance
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
+        /// <param name="instance">The singleton instance to always return when type T is requested.</param>
+        public new ResolverContext<T> To<TTarget>(TTarget instance)
+            where TTarget : T
+        {
+            return AddResolver(new LambdaResolver((context, type) => instance));
         }        
     }
 }

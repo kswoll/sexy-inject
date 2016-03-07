@@ -236,5 +236,36 @@ namespace SexyInject.Tests
             registry.RegisterImplicitPattern();
             Assert.Throws<ArgumentException>(() => registry.Get<InjectionClass>(new SimpleClass(), new SimpleClass()));
         }
+
+        [Test]
+        public void SingletonTo()
+        {
+            var registry = new Registry();
+            var simpleClass = new SimpleClass();
+            Binder binder = registry.Bind<SimpleClass>();
+            binder.To(simpleClass);
+            var result = registry.Get<SimpleClass>();
+            Assert.AreSame(simpleClass, result);
+        }
+
+        [Test]
+        public void SingletonToT()
+        {
+            var registry = new Registry();
+            var simpleClass = new SimpleClass();
+            registry.Bind<SimpleClass>().To(simpleClass);
+            var result = registry.Get<SimpleClass>();
+            Assert.AreSame(simpleClass, result);
+        }
+
+        [Test]
+        public void OptOutOfTransientBinding()
+        {
+            var registry = new Registry();
+            registry.Bind<object>().To((context, type) => context.Construct(type));
+            registry.Bind<SimpleClass>(CachePolicy.Never);
+            var obj = registry.Get<ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass>();
+            Assert.AreNotSame(obj.SimpleClass, obj.ClassWithDependencyOnSimpleClass.SimpleClass);
+        }
     }
 }

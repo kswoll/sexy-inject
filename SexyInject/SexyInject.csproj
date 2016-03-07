@@ -52,6 +52,7 @@
     <Compile Include="ResolveContext.cs" />
     <Compile Include="RegistryException.cs" />
     <Compile Include="ResolverContext.cs" />
+    <Compile Include="CachePolicy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

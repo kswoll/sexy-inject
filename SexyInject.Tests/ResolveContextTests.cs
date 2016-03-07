@@ -14,5 +14,19 @@ namespace SexyInject.Tests
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass);
         }
+
+        [Test]
+        public void Registry()
+        {
+            var registry = new Registry();
+            ResolveContext resolveContext = null;
+            registry.Bind<SimpleClass>().To((context, type) =>
+            {
+                resolveContext = context;
+                return new SimpleClass();
+            });
+            registry.Get<SimpleClass>();
+            Assert.AreSame(registry, resolveContext.Registry);            
+        }
     }
 }

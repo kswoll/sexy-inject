@@ -12,7 +12,7 @@ namespace SexyInject.Tests
         public void AddResolverThroughBaseType()
         {
             var registry = new Registry();
-            Binder binder = new Binder<SimpleClass>(registry);
+            Binder binder = new Binder<SimpleClass>(registry, CachePolicy.Transient);
             var resolver = new TestResolver();
             binder.AddResolver(resolver);
             Assert.IsTrue(binder.Resolvers.Contains(resolver));
@@ -22,14 +22,14 @@ namespace SexyInject.Tests
         public void RegistryProperty()
         {
             var registry = new Registry();
-            var binder = new Binder<SimpleClass>(registry);
+            var binder = new Binder<SimpleClass>(registry, CachePolicy.Transient);
             Assert.AreEqual(registry, binder.Registry);
         }
 
         [Test]
         public void TypeProperty()
         {
-            var binder = new Binder(new Registry(), typeof(string));
+            var binder = new Binder(new Registry(), typeof(string), CachePolicy.Transient);
             Assert.AreEqual(typeof(string), binder.Type);
         }
 
