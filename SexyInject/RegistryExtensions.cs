@@ -41,7 +41,7 @@ namespace SexyInject
         /// <param name="registry"></param>
         public static void RegisterImplicitPattern(this Registry registry)
         {
-            registry.Bind<object>().To(type => registry.Construct(type));
+            registry.Bind<object>().To((context, type) => context.Construct(type));
         }
     }
 }

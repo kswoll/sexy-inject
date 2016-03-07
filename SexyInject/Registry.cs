@@ -9,7 +9,7 @@ namespace SexyInject
 {
     public class Registry
     {
-        private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 1);
+        private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2);
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
         private readonly ConcurrentDictionary<Type, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object>>();
 
@@ -23,19 +23,19 @@ namespace SexyInject
             return binders.GetOrAdd(type, x => new Binder(this, type));
         }
 
-        public T Get<T>()
+        public T Get<T>(params object[] arguments)
         {
-            return (T)Get(typeof(T), CreateResolverContext());
+            return (T)Get(typeof(T), CreateResolverContext(arguments));
         }
 
-        public object Get(Type type)
+        public object Get(Type type, params object[] arguments)
         {
-            return Get(type, CreateResolverContext());
+            return Get(type, CreateResolverContext(arguments));
         }
 
         public Expression GetExpression(Type type)
         {
-            return Expression.Convert(Expression.Call(Expression.Constant(this), getMethod, Expression.Constant(type)), type);
+            return Expression.Convert(Expression.Call(Expression.Constant(this), getMethod, Expression.Constant(type), Expression.Constant(new object[0])), type);
         }
 
         public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
@@ -43,9 +43,14 @@ namespace SexyInject
             return (T)Construct(typeof(T), constructorSelector);
         }
 
-        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public object Construct(Type type, params object[] arguments)
         {
-            return Construct(CreateResolverContext(), type, constructorSelector);
+            return Construct(CreateResolverContext(arguments), type, null);
+        }
+
+        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
+        {
+            return Construct(CreateResolverContext(arguments), type, constructorSelector);
         }
 
         private object Construct(ResolveContext context, Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
@@ -53,10 +58,10 @@ namespace SexyInject
             return factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context);
         }
 
-        private ResolveContext CreateResolverContext()
+        private ResolveContext CreateResolverContext(object[] arguments)
         {
             ResolveContext context = null;
-            context = new ResolveContext(x => Get(x, context), Construct);
+            context = new ResolveContext(x => Get(x, context), Construct, arguments);
             return context;
         }
 

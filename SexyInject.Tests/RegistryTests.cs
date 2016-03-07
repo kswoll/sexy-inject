@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
@@ -210,6 +209,32 @@ namespace SexyInject.Tests
             registry.Bind<object>().To((context, type) => context.Construct(type));
             var obj = registry.Get<ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass>();
             Assert.AreSame(obj.SimpleClass, obj.ClassWithDependencyOnSimpleClass.SimpleClass);
+        }
+
+        [Test]
+        public void PassArgument()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var injectionClass = registry.Get<InjectionClass>(simpleClass);
+            Assert.AreSame(simpleClass, injectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void PassNullArgumentThrows()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            Assert.Throws<ArgumentException>(() => registry.Get<InjectionClass>((object)null));
+        }
+
+        [Test]
+        public void PassDuplicateArgumentThrows()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            Assert.Throws<ArgumentException>(() => registry.Get<InjectionClass>(new SimpleClass(), new SimpleClass()));
         }
     }
 }

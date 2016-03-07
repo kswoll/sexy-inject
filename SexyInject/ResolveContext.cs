@@ -13,10 +13,20 @@ namespace SexyInject
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethod(nameof(Resolve));
 
-        public ResolveContext(Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor)
+        public ResolveContext(Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor, object[] arguments)
         {
             this.resolver = resolver;
             this.constructor = constructor;
+
+            foreach (var argument in arguments)
+            {
+                if (argument == null)
+                    throw new ArgumentException("Arguments array cannot contain null elements.", nameof(arguments));
+                var argumentType = argument.GetType();
+                if (cache.ContainsKey(argumentType))
+                    throw new ArgumentException("Only one argument of the same type may be provided.", nameof(arguments));
+                cache[argumentType] = argument;
+            }
         }
 
         public object Resolve(Type type)
