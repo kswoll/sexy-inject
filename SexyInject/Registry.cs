@@ -25,12 +25,12 @@ namespace SexyInject
 
         public T Get<T>(params object[] arguments)
         {
-            return (T)Get(typeof(T), CreateResolverContext(arguments));
+            return (T)Get(typeof(T), CreateResolverContext(typeof(T), arguments));
         }
 
         public object Get(Type type, params object[] arguments)
         {
-            return Get(type, CreateResolverContext(arguments));
+            return Get(type, CreateResolverContext(type, arguments));
         }
 
         public Expression GetExpression(Type type)
@@ -45,12 +45,12 @@ namespace SexyInject
 
         public object Construct(Type type, params object[] arguments)
         {
-            return Construct(CreateResolverContext(arguments), type, null);
+            return Construct(CreateResolverContext(type, arguments), type, null);
         }
 
         public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
         {
-            return Construct(CreateResolverContext(arguments), type, constructorSelector);
+            return Construct(CreateResolverContext(type, arguments), type, constructorSelector);
         }
 
         private object Construct(ResolveContext context, Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
@@ -58,10 +58,10 @@ namespace SexyInject
             return factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context);
         }
 
-        private ResolveContext CreateResolverContext(object[] arguments)
+        private ResolveContext CreateResolverContext(Type type, object[] arguments)
         {
             ResolveContext context = null;
-            context = new ResolveContext(this, x => Get(x, context), Construct, arguments);
+            context = new ResolveContext(this, x => Get(x, context), Construct, type, arguments);
             return context;
         }
 
