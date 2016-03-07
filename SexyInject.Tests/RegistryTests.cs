@@ -19,6 +19,15 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void ImplicitRegistrationUsingPattern()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
         public void NonGenericGet()
         {
             var registry = new Registry();
@@ -116,6 +125,17 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void ResolveFactoryUsingPattern()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" });
+            registry.RegisterFactoryPattern();
+            var factory = registry.Get<Func<SimpleClass>>();
+            var simpleClass = factory();
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
         public void ResolveLazy()
         {
             var registry = new Registry();
@@ -130,6 +150,17 @@ namespace SexyInject.Tests
                     return Activator.CreateInstance(lazytype, Expression.Lambda(lambdaType, registry.GetExpression(returnType)).Compile());
                 })
                 .Cache((context, targetType) => targetType);
+            var factory = registry.Get<Lazy<SimpleClass>>();
+            var simpleClass = factory.Value;
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
+        public void ResolveLazyUsingPattern()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" });
+            registry.RegisterLazyPattern();
             var factory = registry.Get<Lazy<SimpleClass>>();
             var simpleClass = factory.Value;
             Assert.AreEqual("foo", simpleClass.StringProperty);

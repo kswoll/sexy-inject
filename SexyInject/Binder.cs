@@ -49,8 +49,11 @@ namespace SexyInject
             {
                 lock (locker)
                 {
-                    defaultResolver = new ConstructorResolver(Type);
-                    Interlocked.Exchange(ref defaultResolverCreated, 2);
+                    if (defaultResolver == null)
+                    {
+                        defaultResolver = new ConstructorResolver(Type);
+                        Interlocked.Exchange(ref defaultResolverCreated, 2);                        
+                    }
                 }
             }
             defaultResolver.TryResolve(context, targetType, out result);
