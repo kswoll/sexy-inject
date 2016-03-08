@@ -27,6 +27,14 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void ImplicitRegistrationUsingPatternNotInstantiatable()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            Assert.Throws<RegistryException>(() => registry.Get<ISomeInterface>());
+        }
+
+        [Test]
         public void NonGenericGet()
         {
             var registry = new Registry();
@@ -235,6 +243,16 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.RegisterImplicitPattern();
             Assert.Throws<ArgumentException>(() => registry.Get<InjectionClass>(new SimpleClass(), new SimpleClass()));
+        }
+
+        [Test]
+        public void SingletonCache()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To<SimpleClass>().Cache((context, targetType) => true);
+            var simpleClass1 = registry.Get<SimpleClass>();
+            var simpleClass2 = registry.Get<SimpleClass>();
+            Assert.AreSame(simpleClass1, simpleClass2);
         }
 
         [Test]
