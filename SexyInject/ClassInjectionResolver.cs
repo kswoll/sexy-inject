@@ -7,7 +7,7 @@ namespace SexyInject
         private readonly Func<ResolveContext, Type, object> lambda;
 
 
-        public bool TryResolve(ResolveContext context, Type targetType, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
         {
             throw new NotImplementedException();
         }
