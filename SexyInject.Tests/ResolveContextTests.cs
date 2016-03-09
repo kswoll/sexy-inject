@@ -47,7 +47,7 @@ namespace SexyInject.Tests
             Type parent = null;
             registry.Bind<SimpleClass>().To((context, type) =>
             {
-                parent = context.GetParentRequestedType(0);
+                parent = context.GetCallerType(0);
                 return new SimpleClass();
             });
             registry.Bind<InjectionClass>();
@@ -62,7 +62,7 @@ namespace SexyInject.Tests
             Type parent = null;
             registry.Bind<SimpleClass>().To((context, type) =>
             {
-                parent = context.GetParentRequestedType(1);
+                parent = context.GetCallerType(1);
                 return new SimpleClass();
             });
             registry.Bind<InjectionClass>();

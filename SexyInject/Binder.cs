@@ -124,7 +124,7 @@ namespace SexyInject
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
         public new ResolverContext<T> To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
-            where TTarget : class, T
+            where TTarget : T
         {
             return AddResolver(new ConstructorResolver(typeof(TTarget)));
         }
@@ -135,7 +135,7 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public new ResolverContext<T> To<TTarget>(Func<Type, TTarget> resolver)
-            where TTarget : class, T
+            where TTarget : T
         {
             return AddResolver(new LambdaResolver((context, targetType) => resolver(targetType)));
         }        
@@ -146,9 +146,9 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) that is returned when an instance of T is requested.</typeparam>
         /// <param name="resolver">The lambda function that returns the instance of the reuqested type.</param>
         public new ResolverContext<T> To<TTarget>(Func<ResolveContext, Type, TTarget> resolver)
-            where TTarget : class, T
+            where TTarget : T
         {
-            return AddResolver(new LambdaResolver(resolver));
+            return AddResolver(new LambdaResolver((context, type) => resolver(context, type)));
         }
 
         /// <summary>
@@ -160,6 +160,15 @@ namespace SexyInject
             where TTarget : T
         {
             return AddResolver(new LambdaResolver((context, type) => instance));
-        }        
+        }
+
+        /// <summary>
+        /// Same as To&lt;T&gt; -- but a more concise syntax when you want to resolve to the bound type and apply further
+        /// operators.
+        /// </summary>
+        public ResolverContext<T> To()
+        {
+            return To<T>();
+        }
     }
 }

@@ -39,8 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Argument.cs" />
+    <Compile Include="ArgumentExtensions.cs" />
+    <Compile Include="ArgumentType.cs" />
     <Compile Include="Binder.cs" />
     <Compile Include="CacheResolver.cs" />
+    <Compile Include="ClassInjectionResolver.cs" />
     <Compile Include="ConstructorResolver.cs" />
     <Compile Include="ConstructorResolverBindings.cs" />
     <Compile Include="IResolver.cs" />
@@ -51,6 +55,7 @@
     <Compile Include="RegistryExtensions.cs" />
     <Compile Include="ResolveContext.cs" />
     <Compile Include="RegistryException.cs" />
+    <Compile Include="ResolveContextFrame.cs" />
     <Compile Include="ResolverContext.cs" />
     <Compile Include="CachePolicy.cs" />
   </ItemGroup>

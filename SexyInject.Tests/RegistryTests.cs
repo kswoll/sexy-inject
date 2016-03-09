@@ -285,5 +285,24 @@ namespace SexyInject.Tests
             var obj = registry.Get<ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass>();
             Assert.AreNotSame(obj.SimpleClass, obj.ClassWithDependencyOnSimpleClass.SimpleClass);
         }
+
+        [Test]
+        public void SimpleLambdaBinding()
+        {
+            var registry = new Registry();
+            SimpleClass toSimpleClass = null;
+            registry.Bind<SimpleClass>().To(_ => toSimpleClass = new SimpleClass());
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.AreSame(toSimpleClass, simpleClass);
+        }
+
+        [Test]
+        public void ShorthandTo()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To();
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass);
+        }
     }
 }
