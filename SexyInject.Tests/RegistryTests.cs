@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
@@ -303,6 +304,56 @@ namespace SexyInject.Tests
             registry.Bind<SimpleClass>().To();
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass);
+        }
+
+        [Test]
+        public void ConstructWithTypeAndArgumentsT()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = registry.Construct<InjectionClass>(new Argument(simpleClass, ArgumentType.Pooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructWithTypeAndArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Construct(typeof(InjectionClass), new Argument(simpleClass, ArgumentType.Pooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructWithTypeAndObjectArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Construct(typeof(InjectionClass), simpleClass);
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructWithTypeAndObjectArgumentsAndConstructorSelector()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Construct(typeof(InjectionClass), x => x.First(), simpleClass);
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructWithTypeAndArgumentsAndConstructorSelectorUnpooled()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Construct(typeof(InjectionClass), x => x.First(), new Argument(simpleClass, ArgumentType.Unpooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
         }
     }
 }

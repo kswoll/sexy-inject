@@ -12,13 +12,13 @@ namespace SexyInject
         public Type CallerType => GetCallerType();
 
         private readonly Dictionary<Type, object> cache = new Dictionary<Type, object>();
-        private readonly Func<Type, object[], object> resolver;
-        private readonly Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object[], object> constructor;
-        private readonly List<ResolveContextFrame> requestedTypeStack = new List<ResolveContextFrame>();
+        private readonly Func<Type, object> resolver;
+        private readonly Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor;
+        private readonly List<ResolveContextFrame> frames = new List<ResolveContextFrame>();
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethods().Single(x => x.Name == nameof(Resolve) && x.GetParameters().Length == 2);
 
-        public ResolveContext(Registry registry, Func<Type, object[], object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object[], object> constructor, IEnumerable<object> arguments)
+        public ResolveContext(Registry registry, Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor, IEnumerable<object> arguments)
         {
             Registry = registry;
             this.resolver = resolver;
@@ -75,9 +75,9 @@ namespace SexyInject
         public object Resolve(Type type, params object[] arguments)
         {
             object result;
-            if (!cache.TryGetValue(type, out result) && (!requestedTypeStack.LastOrDefault()?.TryGetArgument(type, out result) ?? true))
+            if (!cache.TryGetValue(type, out result) && (!frames.LastOrDefault()?.TryGetArgument(type, out result) ?? true))
             {
-                result = ProcessFrame(type, arguments, () => resolver(type, arguments));
+                result = ProcessFrame(type, arguments, () => resolver(type));
                 if (Registry.Bind(type).CachePolicy == CachePolicy.Transient) 
                     cache[type] = result;
             }
@@ -91,10 +91,11 @@ namespace SexyInject
         /// <param name="resolveContext">The expression that represents the instance of ResolveContexet upon which you want
         /// to invoke the Resolve method.</param>
         /// <param name="type">The type to pass to the Resolve method.</param>
+        /// <param name="arguments">The arguments array that will be passed to the resolve method.</param>
         /// <returns>An expression that represents invoking the Resolve method.</returns>
-        public static MethodCallExpression ResolveExpression(Expression resolveContext, Type type)
+        public static MethodCallExpression ResolveExpression(Expression resolveContext, Type type, Expression arguments)
         {
-            return Expression.Call(resolveContext, resolveMethod, Expression.Constant(type), Expression.Constant(new object[0]));
+            return Expression.Call(resolveContext, resolveMethod, Expression.Constant(type), arguments);
         }
 
         /// <summary>
@@ -144,7 +145,7 @@ namespace SexyInject
         /// <returns>A new instance of the specified type.</returns>
         public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
         {
-            return ProcessFrame(type, arguments, () => constructor(this, type, constructorSelector, arguments));
+            return ProcessFrame(type, arguments, () => constructor(this, type, constructorSelector));
         }
 
         /// <summary>
@@ -205,22 +206,17 @@ namespace SexyInject
         /// <returns>One of the parent types that is in the process of being resolved.</returns>
         public Type GetCallerType(int index = 0)
         {
-            var trueIndex = requestedTypeStack.Count - 2 - index;
+            var trueIndex = frames.Count - 2 - index;
             if (trueIndex < 0)
                 return null;
-            return requestedTypeStack[trueIndex].RequestedType;
-        }
-
-        public void InjectArgument(object argument)
-        {
-            requestedTypeStack.Last().InjectArgument(argument);
+            return frames[trueIndex].RequestedType;
         }
 
         private object ProcessFrame(Type type, object[] arguments, Func<object> action)
         {
-            requestedTypeStack.Add(new ResolveContextFrame(type, arguments));
+            frames.Add(new ResolveContextFrame(type, arguments));
             var result = action();
-            requestedTypeStack.RemoveAt(requestedTypeStack.Count - 1);
+            frames.RemoveAt(frames.Count - 1);
             return result;
         }
     }

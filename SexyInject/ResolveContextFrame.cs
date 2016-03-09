@@ -23,6 +23,7 @@ namespace SexyInject
             if (arguments?.ContainsKey(argument.GetType()) ?? false)
                 throw new ArgumentException("Cannot pass more than one argument of the same type", nameof(argument));
             arguments = arguments ?? new Dictionary<Type, object>();
+            arguments[argument.GetType()] = argument;
         }
 
         public bool TryGetArgument(Type argumentType, out object result)

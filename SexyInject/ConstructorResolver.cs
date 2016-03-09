@@ -21,7 +21,7 @@ namespace SexyInject
 
         public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
         {
-            result = context.Construct(type, constructorSelector);
+            result = context.Construct(type, constructorSelector, arguments);
             return true;
         }
     }

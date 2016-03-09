@@ -11,7 +11,7 @@ namespace SexyInject
     {
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2 && x.GetParameters()[1].ParameterType == typeof(Argument[]));
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
-        private readonly ConcurrentDictionary<Type, Func<ResolveContext, object[], object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object[], object>>();
+        private readonly ConcurrentDictionary<Type, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object>>();
 
         public Binder<T> Bind<T>(CachePolicy cachePolicy = CachePolicy.Transient)
         {
@@ -115,13 +115,17 @@ namespace SexyInject
 
         private object Construct(ResolveContext context, Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, object[] arguments)
         {
-            return factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context, arguments);
+            return context.Construct(type, constructorSelector, arguments);
         }
 
         private ResolveContext CreateResolverContext(IEnumerable<object> arguments)
         {
             ResolveContext context = null;
-            context = new ResolveContext(this, (x, args) => Get(context, x, args), Construct, arguments);
+            context = new ResolveContext(
+                this, 
+                x => Get(context, x, new object[0]), 
+                (resolveContext, type, constructorSelector) => factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context)
+                , arguments);
             return context;
         }
 
@@ -139,7 +143,7 @@ namespace SexyInject
             return binder.Resolve(context, type, arguments);
         }
 
-        private Func<ResolveContext, object[], object> FactoryGenerator(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        private Func<ResolveContext, object> FactoryGenerator(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
         {
             constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
 
@@ -149,16 +153,15 @@ namespace SexyInject
 
             var parameters = constructor.GetParameters();
             var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
-            var argumentsParameter = Expression.Parameter(typeof(object[]), "arguments");
 
             // context.TryResolve(arg0Type), context.TryResolve(arg1Type)...
-            var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType), x.ParameterType)).ToArray();
+            var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType, Expression.Constant(new object[0])), x.ParameterType)).ToArray();
 
             // new T(arguments)
             var body = Expression.New(constructor, arguments);
 
             // context => body
-            var lambda = Expression.Lambda<Func<ResolveContext, object[], object>>(body, contextParameter, argumentsParameter);
+            var lambda = Expression.Lambda<Func<ResolveContext, object>>(body, contextParameter);
 
             // Compile it into a delegate we can actually invoke
             return lambda.Compile();
