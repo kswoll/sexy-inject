@@ -374,5 +374,24 @@ namespace SexyInject.Tests
             var simpleClass = registry.Get<SimpleClass>();
             Assert.AreEqual("foo", simpleClass.StringProperty);
         }
+
+        [Test]
+        public void PropertyInjectionInt()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Inject(x => x.IntProperty, (context, type) => 5);
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.AreEqual(5, simpleClass.IntProperty);
+        }
+
+        [Test]
+        public void PropertyInjectionImplicit()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Inject(x => x.SomeInterface);
+            registry.Bind<ISomeInterface>().To<SomeClass1>();
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass.SomeInterface);
+        }
     }
 }

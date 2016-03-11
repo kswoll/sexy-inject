@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace SexyInject
 {
     public class PropertyInjectionResolver : IResolver
     {
         private readonly IResolver resolver;
-        private readonly Action<ResolveContext, Type, object> setter;
+        private readonly Action<ResolveContext, object> setter;
 
         public PropertyInjectionResolver(IResolver resolver, LambdaExpression property, Func<ResolveContext, Type, object> factory)
         {
             this.resolver = resolver;
 
             var contextParameter = Expression.Parameter(typeof(ResolveContext));
-            var typeParameter = Expression.Parameter(typeof(Type));
             var objectParameter = Expression.Parameter(typeof(object));
             var memberExpression = property.Body as MemberExpression;
             var memberInfo = memberExpression?.Member;
@@ -26,8 +24,8 @@ namespace SexyInject
             Expression target = Expression.Convert(objectParameter, targetType);
             Expression member = Expression.MakeMemberAccess(target, memberInfo);
 
-            Expression body = Expression.Assign(member, Expression.Convert(Expression.Invoke(Expression.Constant(factory), contextParameter, typeParameter), memberExpression.Type));
-            var lambda = Expression.Lambda<Action<ResolveContext, Type, object>>(body, contextParameter, typeParameter, objectParameter);
+            Expression body = Expression.Assign(member, Expression.Convert(Expression.Invoke(Expression.Constant(factory), contextParameter, Expression.Constant(memberExpression.Type)), memberExpression.Type));
+            var lambda = Expression.Lambda<Action<ResolveContext, object>>(body, contextParameter, objectParameter);
             setter = lambda.Compile();
         }
 
@@ -35,7 +33,7 @@ namespace SexyInject
         {
             if (resolver.TryResolve(context, targetType, out result))
             {
-                setter(context, targetType, result);
+                setter(context, result);
                 return true;
             }
             else

@@ -54,9 +54,14 @@ namespace SexyInject
         {
         }
 
-        public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, Type, object> factory)
+        public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, Type, TValue> factory)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, factory));
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context, type)));
+        }
+
+        public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => context.Resolve(type)));
         }
 
         protected new ResolverContext<T> Decorate(Func<IResolver, IResolver> decorator)
