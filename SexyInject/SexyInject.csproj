@@ -53,6 +53,7 @@
     <Compile Include="LambdaResolver.cs" />
     <Compile Include="PredicatedResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyInjectionResolver.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="RegistryExtensions.cs" />
     <Compile Include="ResolveContext.cs" />

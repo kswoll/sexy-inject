@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 
 namespace SexyInject
 {
@@ -7,6 +8,13 @@ namespace SexyInject
         public Registry Registry { get; }
         public Binder Binder { get; }
         public IResolver Resolver { get; private set; }
+
+        public ResolverContext(Registry registry, Binder binder, IResolver resolver)
+        {
+            Registry = registry;
+            Binder = binder;
+            Resolver = resolver;
+        }
 
         /// <summary>
         /// Constrains the resolver to only be applied when the specified predicate is satisfied.
@@ -29,14 +37,9 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext Cache(Func<ResolveContext, Type, object> keySelector) => Decorate(x => new CacheResolver(x, keySelector));
 
-        public ResolverContext(Registry registry, Binder binder, IResolver resolver)
-        {
-            Registry = registry;
-            Binder = binder;
-            Resolver = resolver;
-        }
+        public ResolverContext Inject(Func<ResolveContext, Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, factory));
 
-        private ResolverContext Decorate(Func<IResolver, IResolver> decorator)
+        protected ResolverContext Decorate(Func<IResolver, IResolver> decorator)
         {
             Resolver = decorator(Resolver);
             return this;
@@ -49,6 +52,16 @@ namespace SexyInject
 
         public ResolverContext(Registry registry, Binder<T> binder, IResolver resolver) : base(registry, binder, resolver)
         {
+        }
+
+        public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, Type, object> factory)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, factory));
+        }
+
+        protected new ResolverContext<T> Decorate(Func<IResolver, IResolver> decorator)
+        {
+            return (ResolverContext<T>)base.Decorate(decorator);
         }
     }
 }

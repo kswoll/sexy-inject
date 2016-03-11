@@ -355,5 +355,24 @@ namespace SexyInject.Tests
             var instance = (InjectionClass)registry.Construct(typeof(InjectionClass), x => x.First(), new Argument(simpleClass, ArgumentType.Unpooled));
             Assert.AreSame(simpleClass, instance.SimpleClass);
         }
+
+        [Test]
+        public void ClassInjection()
+        {
+            var registry = new Registry();
+            var simpleClass = new SimpleClass();
+            registry.Bind<InjectionClass>().To().Inject((context, type) => simpleClass);
+            var injectionClass = registry.Get<InjectionClass>();
+            Assert.AreSame(simpleClass, injectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void PropertyInjection()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Inject(x => x.StringProperty, (context, type) => "foo");
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
     }
 }

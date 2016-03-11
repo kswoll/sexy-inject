@@ -220,5 +220,10 @@ namespace SexyInject
             frames.RemoveAt(frames.Count - 1);
             return result;
         }
+
+        public void InjectArgument(object argument)
+        {
+            frames.Last().InjectArgument(argument);
+        }
     }
 }

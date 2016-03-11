@@ -8,12 +8,19 @@ namespace SexyInject
     /// </summary>
     public class ClassInjectionResolver : IResolver
     {
+        private readonly IResolver resolver;
         private readonly Func<ResolveContext, Type, object> lambda;
 
+        public ClassInjectionResolver(IResolver resolver, Func<ResolveContext, Type, object> lambda)
+        {
+            this.resolver = resolver;
+            this.lambda = lambda;
+        }
 
         public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
-            throw new NotImplementedException();
+            context.InjectArgument(lambda(context, targetType));
+            return resolver.TryResolve(context, targetType, out result);
         }
     }
 }
