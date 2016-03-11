@@ -11,7 +11,7 @@ namespace SexyInject
     {
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2 && x.GetParameters()[1].ParameterType == typeof(Argument[]));
         private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
-        private readonly ConcurrentDictionary<Type, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Type, Func<ResolveContext, object>>();
+        private readonly ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>>();
 
         public Binder<T> Bind<T>(CachePolicy cachePolicy = CachePolicy.Transient)
         {
@@ -63,7 +63,7 @@ namespace SexyInject
             return (T)Construct(typeof(T), null, new Argument[0]);
         }
 
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        public T Construct<T>(ConstructorSelector constructorSelector)
         {
             return (T)Construct(typeof(T), constructorSelector, new Argument[0]);
         }
@@ -78,12 +78,12 @@ namespace SexyInject
             return (T)Construct(typeof(T), null, arguments);
         }
 
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params Argument[] arguments)
+        public T Construct<T>(ConstructorSelector constructorSelector, params Argument[] arguments)
         {
             return (T)Construct(typeof(T), constructorSelector, arguments);
         }
 
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
+        public T Construct<T>(ConstructorSelector constructorSelector, params object[] arguments)
         {
             return (T)Construct(typeof(T), constructorSelector, arguments);
         }
@@ -103,17 +103,17 @@ namespace SexyInject
             return Construct(type, null, arguments.ToArguments(ArgumentType.Pooled));
         }
 
-        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
+        public object Construct(Type type, ConstructorSelector constructorSelector, params object[] arguments)
         {
             return Construct(type, constructorSelector, arguments.ToArguments(ArgumentType.Pooled));
         }
 
-        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params Argument[] arguments)
+        public object Construct(Type type, ConstructorSelector constructorSelector, params Argument[] arguments)
         {
             return Construct(CreateResolverContext(arguments.Where(x => x.ArgumentType == ArgumentType.Pooled).Select(x => x.Value)), type, constructorSelector, arguments.Where(x => x.ArgumentType == ArgumentType.Unpooled).Select(x => x.Value).ToArray());
         }
 
-        private object Construct(ResolveContext context, Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, object[] arguments)
+        private object Construct(ResolveContext context, Type type, ConstructorSelector constructorSelector, object[] arguments)
         {
             return context.Construct(type, constructorSelector, arguments);
         }
@@ -124,7 +124,7 @@ namespace SexyInject
             context = new ResolveContext(
                 this,
                 x => Resolve(context, x), 
-                (resolveContext, type, constructorSelector) => factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context)
+                (type, constructorSelector) => factoryCache.GetOrAdd(Tuple.Create(type, constructorSelector), x => FactoryGenerator(x.Item1, x.Item2))(context)
                 , arguments);
             return context;
         }
@@ -148,7 +148,7 @@ namespace SexyInject
             return context.Resolve(type, arguments);
         }
 
-        private Func<ResolveContext, object> FactoryGenerator(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        private Func<ResolveContext, object> FactoryGenerator(Type type, ConstructorSelector constructorSelector)
         {
             constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
 

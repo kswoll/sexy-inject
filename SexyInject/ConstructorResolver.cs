@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 
 namespace SexyInject
 {
@@ -11,17 +10,17 @@ namespace SexyInject
     public class ConstructorResolver : IResolver
     {
         private readonly Type type;
-        private readonly Func<ConstructorInfo[], ConstructorInfo> constructorSelector;
+        private readonly ConstructorSelector constructorSelector;
 
-        public ConstructorResolver(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public ConstructorResolver(Type type, ConstructorSelector constructorSelector = null)
         {
             this.type = type;
-            this.constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
+            this.constructorSelector = constructorSelector;
         }
 
         public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
-            result = context.Construct(type, constructorSelector);
+            result = context.Constructor(type, constructorSelector);
             return true;
         }
     }

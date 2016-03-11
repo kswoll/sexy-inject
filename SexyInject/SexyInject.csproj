@@ -45,6 +45,8 @@
     <Compile Include="Binder.cs" />
     <Compile Include="CacheResolver.cs" />
     <Compile Include="ClassInjectionResolver.cs" />
+    <Compile Include="Constructor.cs" />
+    <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
     <Compile Include="ConstructorResolverBindings.cs" />
     <Compile Include="IResolver.cs" />

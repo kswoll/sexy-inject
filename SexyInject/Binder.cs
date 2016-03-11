@@ -68,7 +68,7 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        public ResolverContext To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public ResolverContext To<TTarget>(ConstructorSelector constructorSelector = null)
         {
             return AddResolver(new ConstructorResolver(typeof(TTarget)));
         }
@@ -123,7 +123,7 @@ namespace SexyInject
         /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        public new ResolverContext<T> To<TTarget>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector = null)
+        public new ResolverContext<T> To<TTarget>(ConstructorSelector constructorSelector = null)
             where TTarget : T
         {
             return AddResolver(new ConstructorResolver(typeof(TTarget)));

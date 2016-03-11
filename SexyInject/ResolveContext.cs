@@ -10,15 +10,16 @@ namespace SexyInject
     {
         public Registry Registry { get; }
         public Type CallerType => GetCallerType();
+        public Constructor Constructor => constructor;
 
         private readonly Dictionary<Type, object> cache = new Dictionary<Type, object>();
         private readonly Func<Type, object> resolver;
-        private readonly Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor;
+        private readonly Constructor constructor;
         private readonly List<ResolveContextFrame> frames = new List<ResolveContextFrame>();
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethods().Single(x => x.Name == nameof(Resolve) && x.GetParameters().Length == 2);
 
-        public ResolveContext(Registry registry, Func<Type, object> resolver, Func<ResolveContext, Type, Func<ConstructorInfo[], ConstructorInfo>, object> constructor, IEnumerable<object> arguments)
+        public ResolveContext(Registry registry, Func<Type, object> resolver, Constructor constructor, IEnumerable<object> arguments)
         {
             Registry = registry;
             this.resolver = resolver;
@@ -105,7 +106,7 @@ namespace SexyInject
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
         /// <returns>A new instance of the specified type.</returns>
-        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        public object Construct(Type type, ConstructorSelector constructorSelector)
         {
             return Construct(type, constructorSelector, new object[0]);
         }
@@ -143,9 +144,9 @@ namespace SexyInject
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of the specified type.</returns>
-        public object Construct(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
+        public object Construct(Type type, ConstructorSelector constructorSelector, params object[] arguments)
         {
-            return ProcessFrame(type, arguments, () => constructor(this, type, constructorSelector));
+            return ProcessFrame(type, arguments, () => constructor(type, constructorSelector));
         }
 
         /// <summary>
@@ -165,7 +166,7 @@ namespace SexyInject
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
         /// <returns>A new instance of T.</returns>
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector)
+        public T Construct<T>(ConstructorSelector constructorSelector)
         {
             return (T)Construct(typeof(T), constructorSelector);
         }
@@ -193,7 +194,7 @@ namespace SexyInject
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of T.</returns>
-        public T Construct<T>(Func<ConstructorInfo[], ConstructorInfo> constructorSelector, params object[] arguments)
+        public T Construct<T>(ConstructorSelector constructorSelector, params object[] arguments)
         {
             return (T)Construct(typeof(T), constructorSelector, arguments);
         }
