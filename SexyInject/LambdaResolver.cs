@@ -11,7 +11,7 @@ namespace SexyInject
             this.lambda = lambda;
         }
 
-        public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
             result = lambda(context, targetType);
             return true;

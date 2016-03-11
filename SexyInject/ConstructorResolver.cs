@@ -19,9 +19,9 @@ namespace SexyInject
             this.constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
         }
 
-        public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
-            result = context.Construct(type, constructorSelector, arguments);
+            result = context.Construct(type, constructorSelector);
             return true;
         }
     }

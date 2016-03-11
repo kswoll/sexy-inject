@@ -15,12 +15,12 @@ namespace SexyInject
             this.keySelector = keySelector;
         }
 
-        public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
             var cachedResult = cache.GetOrAdd(keySelector(context, targetType), _ =>
             {
                 object innerResult;
-                var found = resolver.TryResolve(context, targetType, arguments, out innerResult);
+                var found = resolver.TryResolve(context, targetType, out innerResult);
                 return Tuple.Create(innerResult, found);
             });
             result = cachedResult.Item1;

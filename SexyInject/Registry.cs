@@ -122,14 +122,14 @@ namespace SexyInject
         {
             ResolveContext context = null;
             context = new ResolveContext(
-                this, 
-                x => Get(context, x, new object[0]), 
+                this,
+                x => Resolve(context, x), 
                 (resolveContext, type, constructorSelector) => factoryCache.GetOrAdd(type, x => FactoryGenerator(x, constructorSelector))(context)
                 , arguments);
             return context;
         }
 
-        private object Get(ResolveContext context, Type type, object[] arguments)
+        private object Resolve(ResolveContext context, Type type)
         {
             Binder binder = null;
             foreach (var current in EnumerateBaseTypes(type))
@@ -140,7 +140,12 @@ namespace SexyInject
             if (binder == null)
                 throw new RegistryException($"The type {type.FullName} has not been registered and AllowImplicitRegistration is disabled.");
 
-            return binder.Resolve(context, type, arguments);
+            return binder.Resolve(context, type);            
+        }
+
+        private object Get(ResolveContext context, Type type, object[] arguments)
+        {
+            return context.Resolve(type, arguments);
         }
 
         private Func<ResolveContext, object> FactoryGenerator(Type type, Func<ConstructorInfo[], ConstructorInfo> constructorSelector)

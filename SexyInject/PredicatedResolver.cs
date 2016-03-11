@@ -13,11 +13,11 @@ namespace SexyInject
             this.predicate = predicate;
         }
 
-        public bool TryResolve(ResolveContext context, Type targetType, object[] arguments, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, out object result)
         {
             if (predicate(context, targetType))
             {
-                return resolver.TryResolve(context, targetType, arguments, out result);
+                return resolver.TryResolve(context, targetType, out result);
             }
             result = null;
             return false;

@@ -39,12 +39,12 @@ namespace SexyInject
 
         public IEnumerable<IResolver> Resolvers => resolvers.Select(x => x.Resolver);
 
-        public object Resolve(ResolveContext context, Type targetType, object[] arguments)
+        public object Resolve(ResolveContext context, Type targetType)
         {
             object result;
             foreach (var resolver in Resolvers)
             {
-                if (resolver.TryResolve(context, targetType, arguments, out result))
+                if (resolver.TryResolve(context, targetType, out result))
                     return result;
             }
             if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
@@ -58,7 +58,7 @@ namespace SexyInject
                     }
                 }
             }
-            defaultResolver.TryResolve(context, targetType, arguments, out result);
+            defaultResolver.TryResolve(context, targetType, out result);
             return result;
         }
 
