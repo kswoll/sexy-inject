@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
 
@@ -17,6 +18,28 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void ConstructTWithArgs()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass(context.Construct<InjectionClass>(simpleClass)));
+            var injectionClass = registry.Get<SecondLevelInjectionClass>();
+            Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructTWithArgsAndResolver()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var someClass1 = new SomeClass1();
+            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)), someClass1)));
+            var instance = registry.Get<MultiConstructorDependent>();
+            Assert.AreSame(someClass1, instance.MultiConstructorClass.SomeInterface);
+        }
+
+        [Test]
         public void ResolveT()
         {
             var registry = new Registry();
@@ -24,6 +47,52 @@ namespace SexyInject.Tests
             registry.Bind<InjectionClass>().To((context, type) => new InjectionClass(context.Resolve<SimpleClass>()));
             var injectionClass = registry.Get<InjectionClass>();
             Assert.IsNotNull(injectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void ResolveTArgs()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass(context.Resolve<InjectionClass>(simpleClass)));
+            var injectionClass = registry.Get<SecondLevelInjectionClass>();
+            Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void ResolveTypeArgs()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass((InjectionClass)context.Resolve(typeof(InjectionClass), simpleClass)));
+            var injectionClass = registry.Get<SecondLevelInjectionClass>();
+            Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructTWithResolver()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Bind<ISomeInterface>().To<SomeClass1>();
+            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)))));
+            var instance = registry.Get<MultiConstructorDependent>();
+            Assert.IsNull(instance.MultiConstructorClass.SimpleClass);
+            Assert.IsNotNull(instance.MultiConstructorClass.SomeInterface);
+        }
+
+        [Test]
+        public void ConstructTypeWithResolver()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Bind<ISomeInterface>().To<SomeClass1>();
+            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent((MultiConstructorClass)context.Construct(typeof(MultiConstructorClass), constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)))));
+            var instance = registry.Get<MultiConstructorDependent>();
+            Assert.IsNull(instance.MultiConstructorClass.SimpleClass);
+            Assert.IsNotNull(instance.MultiConstructorClass.SomeInterface);
         }
 
         [Test]
@@ -68,6 +137,31 @@ namespace SexyInject.Tests
             registry.Bind<InjectionClass>();
             registry.Get<InjectionClass>();
             Assert.IsNull(parent);            
+        }
+
+        [Test]
+        public void NullArgumentThrows()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To((context, type) =>
+            {
+                Assert.Throws<ArgumentNullException>(() => context.InjectArgument(null));
+                return new SimpleClass();
+            });
+            registry.Get<SimpleClass>();
+        }
+
+        [Test]
+        public void DuplicateArgumentThrows()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To((context, type) =>
+            {
+                context.InjectArgument("foo");
+                Assert.Throws<ArgumentException>(() => context.InjectArgument("bar"));
+                return new SimpleClass();
+            });
+            registry.Get<SimpleClass>();
         }
     }
 }

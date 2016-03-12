@@ -8,6 +8,7 @@ namespace SexyInject.Tests.TestClasses
         public ISomeInterface SomeInterface { get; set; }
         public int IntProperty { get; set; }
         public bool BoolField;
-        public readonly DateTime ReadonlyField = new DateTime(2016, 1, 1); 
+        public readonly DateTime ReadonlyField = new DateTime(2016, 1, 1);
+        public string ReadonlyProperty { get; } = "foo";
     }
 }

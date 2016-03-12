@@ -132,7 +132,7 @@ namespace SexyInject
         private object Resolve(ResolveContext context, Type type)
         {
             Binder binder = null;
-            foreach (var current in EnumerateBaseTypes(type))
+            foreach (var current in context.EnumerateTypeHierarchy(type))
             {
                 if (binders.TryGetValue(current, out binder))
                     break;
@@ -170,26 +170,6 @@ namespace SexyInject
 
             // Compile it into a delegate we can actually invoke
             return lambda.Compile();
-        }
-
-        private IEnumerable<Type> EnumerateBaseTypes(Type type)
-        {
-            var current = type;
-            while (current != null)
-            {
-                yield return current;
-
-                if (current.IsGenericType)
-                    yield return current.GetGenericTypeDefinition();
-
-                current = current.BaseType;
-            }
-            foreach (var @interface in type.GetInterfaces())
-            {
-                yield return @interface;
-                if (@interface.IsGenericType)
-                    yield return @interface.GetGenericTypeDefinition();
-            }
         }
     }
 }

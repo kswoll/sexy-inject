@@ -215,7 +215,7 @@ namespace SexyInject
 
         private object ProcessFrame(Type type, object[] arguments, Func<object> action)
         {
-            frames.Add(new ResolveContextFrame(type, arguments));
+            frames.Add(new ResolveContextFrame(this, type, arguments));
             var result = action();
             frames.RemoveAt(frames.Count - 1);
             return result;
@@ -224,6 +224,26 @@ namespace SexyInject
         public void InjectArgument(object argument)
         {
             frames.Last().InjectArgument(argument);
+        }
+
+        public IEnumerable<Type> EnumerateTypeHierarchy(Type type)
+        {
+            var current = type;
+            while (current != null)
+            {
+                yield return current;
+
+                if (current.IsGenericType)
+                    yield return current.GetGenericTypeDefinition();
+
+                current = current.BaseType;
+            }
+            foreach (var @interface in type.GetInterfaces())
+            {
+                yield return @interface;
+                if (@interface.IsGenericType)
+                    yield return @interface.GetGenericTypeDefinition();
+            }
         }
     }
 }

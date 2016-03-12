@@ -42,7 +42,7 @@ namespace SexyInject
         public static void RegisterImplicitPattern(this Registry registry)
         {
             Func<Type, bool> isInstantiatable = type => !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
-            registry.Bind<object>().To((context, type) => context.Construct(type)).When((context, targetType) => isInstantiatable(targetType));
+            registry.Bind<object>().To((context, type) => context.Constructor(type)).When((context, targetType) => isInstantiatable(targetType));
         }
     }
 }

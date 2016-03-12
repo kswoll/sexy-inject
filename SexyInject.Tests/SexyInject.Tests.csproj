@@ -56,6 +56,9 @@
     <Compile Include="TestClasses\IGenericInterface.cs" />
     <Compile Include="TestClasses\IConstructedGenericInterface.cs" />
     <Compile Include="TestClasses\ISimpleClass.cs" />
+    <Compile Include="TestClasses\MultiConstructorClass.cs" />
+    <Compile Include="TestClasses\MultiConstructorDependent.cs" />
+    <Compile Include="TestClasses\SecondLevelInjectionClass.cs" />
     <Compile Include="TestClasses\SimpleClass.cs" />
     <Compile Include="TestClasses\InjectionClass.cs" />
     <Compile Include="TestClasses\ClassWithoutConstructor.cs" />

@@ -418,5 +418,12 @@ namespace SexyInject.Tests
             var registry = new Registry();
             Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyField, _ => DateTime.MinValue));
         }
+
+        [Test]
+        public void ReadonlyPropertyInjectionThrows()
+        {
+            var registry = new Registry();
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyProperty, _ => "bar"));
+        }
     }
 }
