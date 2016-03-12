@@ -376,6 +376,15 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void PropertyInjectionJustContext()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Inject(x => x.StringProperty, type => "foo");
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
         public void PropertyInjectionInt()
         {
             var registry = new Registry();
@@ -392,6 +401,22 @@ namespace SexyInject.Tests
             registry.Bind<ISomeInterface>().To<SomeClass1>();
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass.SomeInterface);
+        }
+
+        [Test]
+        public void FieldInjection()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Inject(x => x.BoolField, _ => true);
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsTrue(simpleClass.BoolField);
+        }
+
+        [Test]
+        public void ReadonlyFieldInjectionThrows()
+        {
+            var registry = new Registry();
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyField, _ => DateTime.MinValue));
         }
     }
 }

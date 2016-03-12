@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace SexyInject
 {
+    /// <summary>
+    /// Injects dependencies into a specific property by using a factory function to resolve the dependency.
+    /// </summary>
     public class PropertyInjectionResolver : IResolver
     {
         private readonly IResolver resolver;
@@ -18,7 +22,11 @@ namespace SexyInject
             var memberExpression = property.Body as MemberExpression;
             var memberInfo = memberExpression?.Member;
             if (memberExpression == null || memberInfo == null || property.Parameters.Count != 1 || memberExpression.Expression != property.Parameters[0])
-                throw new ArgumentException("Expression must have one parameter specify a property directly on it.", nameof(property));
+                throw new ArgumentException("Expression must have one parameter and specify a property directly on it.", nameof(property));
+            if (!(memberInfo as PropertyInfo)?.CanWrite ?? false)
+                throw new ArgumentException($"Property {memberInfo.DeclaringType.FullName}.{memberInfo.Name} has no setter.");
+            if ((memberInfo as FieldInfo)?.Attributes.HasFlag(FieldAttributes.InitOnly) ?? false)
+                throw new ArgumentException($"Field {memberInfo.DeclaringType.FullName}.{memberInfo.Name} is readonly.");
 
             Type targetType = property.Parameters.Single().Type;
             Expression target = Expression.Convert(objectParameter, targetType);

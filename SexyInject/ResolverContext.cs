@@ -3,6 +3,9 @@ using System.Linq.Expressions;
 
 namespace SexyInject
 {
+    /// <summary>
+    /// Helper class to facilitate a fluent syntax for customizing the binding between a specified pair of types.
+    /// </summary>
     public class ResolverContext
     {
         public Registry Registry { get; }
@@ -37,6 +40,11 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext Cache(Func<ResolveContext, Type, object> keySelector) => Decorate(x => new CacheResolver(x, keySelector));
 
+        /// <summary>
+        /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
+        /// </summary>
+        /// <param name="factory">Provides an instance of the dependency to inject</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext Inject(Func<ResolveContext, Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, factory));
 
         protected ResolverContext Decorate(Func<IResolver, IResolver> decorator)
@@ -46,6 +54,10 @@ namespace SexyInject
         }
     }
 
+    /// <summary>
+    /// Helper class to facilitate a fluent syntax for customizing the binding between a specified pair of types.
+    /// </summary>
+    /// <typeparam name="T">The type to which the binding will resolve.</typeparam>
     public class ResolverContext<T> : ResolverContext
     {
         public new Binder<T> Binder => (Binder<T>)base.Binder;
@@ -54,11 +66,36 @@ namespace SexyInject
         {
         }
 
+        /// <summary>
+        /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
+        /// </summary>
+        /// <typeparam name="TValue">The type of object that is the dependency being injected</typeparam>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <param name="factory">Provides the dependency that should be injected into the specified property.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, Type, TValue> factory)
         {
             return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context, type)));
         }
 
+        /// <summary>
+        /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
+        /// </summary>
+        /// <typeparam name="TValue">The type of object that is the dependency being injected</typeparam>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <param name="factory">Provides the dependency that should be injected into the specified property.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, TValue> factory)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context)));
+        }
+
+        /// <summary>
+        /// Makes it so the specified property will be injected with an instance of its type.
+        /// </summary>
+        /// <typeparam name="TValue">The type of object that is the dependency being injected</typeparam>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> Inject<TValue>(Expression<Func<T, TValue>> property)
         {
             return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => context.Resolve(type)));

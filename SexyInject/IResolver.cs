@@ -2,6 +2,10 @@
 
 namespace SexyInject
 {
+    /// <summary>
+    /// An interface easily composable with other instances of IResolver using the decorator pattern
+    /// to provide fine-grained control of the binding logic.
+    /// </summary>
     public interface IResolver
     {
         /// <summary>
