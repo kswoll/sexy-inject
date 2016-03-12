@@ -228,7 +228,18 @@ namespace SexyInject
 
         public IEnumerable<Type> EnumerateTypeHierarchy(Type type)
         {
-            var current = type;
+            yield return type;
+            if (type.IsGenericType)
+                yield return type.GetGenericTypeDefinition();
+
+            foreach (var @interface in type.GetInterfaces())
+            {
+                yield return @interface;
+                if (@interface.IsGenericType)
+                    yield return @interface.GetGenericTypeDefinition();
+            }
+
+            var current = type.BaseType;
             while (current != null)
             {
                 yield return current;
@@ -237,12 +248,6 @@ namespace SexyInject
                     yield return current.GetGenericTypeDefinition();
 
                 current = current.BaseType;
-            }
-            foreach (var @interface in type.GetInterfaces())
-            {
-                yield return @interface;
-                if (@interface.IsGenericType)
-                    yield return @interface.GetGenericTypeDefinition();
             }
         }
     }

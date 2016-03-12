@@ -8,7 +8,7 @@ namespace SexyInject
     {
         public Type RequestedType { get; }
 
-        private ResolveContext context;
+        private readonly ResolveContext context;
         private Dictionary<Type, object> arguments;
 
         public ResolveContextFrame(ResolveContext context, Type requestedType, object[] arguments)
