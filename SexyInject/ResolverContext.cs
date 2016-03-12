@@ -91,6 +91,20 @@ namespace SexyInject
         }
 
         /// <summary>
+        /// Constrains the resolver to only be applied when the specified predicate is satisfied.
+        /// </summary>
+        /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public new ResolverContext<T> When(Func<ResolveContext, Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, predicate));
+
+        /// <summary>
+        /// Constrains the resolver to only be applied when the specified predicate is satisfied.
+        /// </summary>
+        /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public new ResolverContext<T> When(Func<Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, (context, type) => predicate(type)));
+
+        /// <summary>
         /// Makes it so the specified property will be injected with an instance of its type.
         /// </summary>
         /// <typeparam name="TValue">The type of object that is the dependency being injected</typeparam>

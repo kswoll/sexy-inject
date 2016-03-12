@@ -81,10 +81,39 @@ namespace SexyInject.Tests
         public void PredicatedResolver()
         {
             var registry = new Registry();
+            ((ResolverContext)registry.Bind<ISomeInterface>().To<SomeClass1>()).When((x, y) => false);
+            ((ResolverContext)registry.Bind<ISomeInterface>().To<SomeClass2>()).When((x, y) => true);
+            var impl = registry.Get<ISomeInterface>();
+            Assert.IsTrue(impl is SomeClass2);
+        }
+
+        [Test]
+        public void PredicatedResolverJustType()
+        {
+            var registry = new Registry();
+            ((ResolverContext)registry.Bind<ISomeInterface>().To<SomeClass1>()).When(_ => false);
+            ((ResolverContext)registry.Bind<ISomeInterface>().To<SomeClass2>()).When(_ => true);
+            var impl = registry.Get<ISomeInterface>();
+            Assert.IsTrue(impl is SomeClass2);
+        }
+
+        [Test]
+        public void PredicatedResolverT()
+        {
+            var registry = new Registry();
             registry.Bind<ISomeInterface>().To<SomeClass1>().When((x, y) => false);
             registry.Bind<ISomeInterface>().To<SomeClass2>().When((x, y) => true);
             var impl = registry.Get<ISomeInterface>();
             Assert.IsTrue(impl is SomeClass2);
+        }
+
+        [Test]
+        public void PredicatedResolverNone()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().When((x, y) => false);
+            var impl = registry.Get<SimpleClass>();
+            Assert.IsNull(impl);
         }
 
         [Test]
@@ -376,6 +405,22 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void InvalidPropertyInjection()
+        {
+            var registry = new Registry();
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => null, (context, type) => "foo"));
+        }
+
+        [Test]
+        public void PredicatedPropertyInjection()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().When(_ => false).Inject(x => x.StringProperty, (context, type) => "foo");
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNull(simpleClass);
+        }
+
+        [Test]
         public void PropertyInjectionJustContext()
         {
             var registry = new Registry();
@@ -424,6 +469,76 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyProperty, _ => "bar"));
+        }
+
+        [Test]
+        public void GetTypeWithArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Get(typeof(InjectionClass), simpleClass);
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void GetTypeWithPooledArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Get(typeof(InjectionClass), new Argument(simpleClass, ArgumentType.Pooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void GetTypeWithUnpooledArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = (InjectionClass)registry.Get(typeof(InjectionClass), new Argument(simpleClass, ArgumentType.Unpooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructTWithArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = registry.Construct<InjectionClass>(simpleClass);
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructTWithSelector()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var instance = registry.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(SimpleClass)));
+            Assert.IsNotNull(instance.SimpleClass);
+            Assert.IsNull(instance.SomeInterface);
+        }
+
+        [Test]
+        public void ConstructTWithSelectorAndArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = registry.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(SimpleClass)), simpleClass);
+            Assert.AreSame(simpleClass, instance.SimpleClass);
+        }
+
+        [Test]
+        public void ConstructTWithSelectorAndUnpooledArguments()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            var simpleClass = new SimpleClass();
+            var instance = registry.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(SimpleClass)), new Argument(simpleClass, ArgumentType.Pooled));
+            Assert.AreSame(simpleClass, instance.SimpleClass);
         }
     }
 }

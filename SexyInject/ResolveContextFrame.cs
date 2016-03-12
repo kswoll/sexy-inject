@@ -36,8 +36,6 @@ namespace SexyInject
             }
         }
 
-        public bool HasArguments => arguments.Any();
-
         public bool TryGetArgument(Type argumentType, out object result)
         {
             if (arguments == null)

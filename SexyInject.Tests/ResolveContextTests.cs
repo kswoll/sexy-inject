@@ -61,6 +61,16 @@ namespace SexyInject.Tests
         }
 
         [Test]
+        public void WrongArgumentIsIgnored()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Bind<InjectionClass>().To().Inject((context, type) => new SomeClass1());
+            var injectionClass = registry.Get<InjectionClass>();
+            Assert.IsNotNull(injectionClass.SimpleClass);
+        }
+
+        [Test]
         public void ResolveTypeArgs()
         {
             var registry = new Registry();

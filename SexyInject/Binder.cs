@@ -42,11 +42,16 @@ namespace SexyInject
         public object Resolve(ResolveContext context, Type targetType)
         {
             object result;
+            bool hasResolvers = false;
             foreach (var resolver in Resolvers)
             {
+                hasResolvers = true;
                 if (resolver.TryResolve(context, targetType, out result))
                     return result;
             }
+            if (hasResolvers)
+                return null;
+
             if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
             {
                 lock (locker)
