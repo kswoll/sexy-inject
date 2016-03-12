@@ -65,7 +65,7 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry.Bind<InjectionClass>().To().Inject((context, type) => new SomeClass1());
+            registry.Bind<InjectionClass>().To().InjectArgument((context, type) => new SomeClass1());
             var injectionClass = registry.Get<InjectionClass>();
             Assert.IsNotNull(injectionClass.SimpleClass);
         }

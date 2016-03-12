@@ -390,7 +390,17 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             var simpleClass = new SimpleClass();
-            registry.Bind<InjectionClass>().To().Inject((context, type) => simpleClass);
+            registry.Bind<InjectionClass>().To().InjectArgument((context, type) => simpleClass);
+            var injectionClass = registry.Get<InjectionClass>();
+            Assert.AreSame(simpleClass, injectionClass.SimpleClass);
+        }
+
+        [Test]
+        public void ClassInjectionJustType()
+        {
+            var registry = new Registry();
+            var simpleClass = new SimpleClass();
+            registry.Bind<InjectionClass>().To().InjectArgument(_ => simpleClass);
             var injectionClass = registry.Get<InjectionClass>();
             Assert.AreSame(simpleClass, injectionClass.SimpleClass);
         }
@@ -399,23 +409,35 @@ namespace SexyInject.Tests
         public void PropertyInjection()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().Inject(x => x.StringProperty, (context, type) => "foo");
+            registry.Bind<SimpleClass>().To().InjectProperty(x => x.StringProperty, (context, type) => "foo");
             var simpleClass = registry.Get<SimpleClass>();
             Assert.AreEqual("foo", simpleClass.StringProperty);
+        }
+
+        [Test]
+        public void PropertiesInjection()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Bind<ISomeInterface>().To<SomeClass1>();
+            registry.Bind<SimpleClass>().To().InjectProperties(x => x.SubClass, x => x.SomeInterface);
+            var simpleClass = registry.Get<SimpleClass>();
+            Assert.IsNotNull(simpleClass.SomeInterface);
+            Assert.IsNotNull(simpleClass.SubClass);
         }
 
         [Test]
         public void InvalidPropertyInjection()
         {
             var registry = new Registry();
-            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => null, (context, type) => "foo"));
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().InjectProperty(x => null, (context, type) => "foo"));
         }
 
         [Test]
         public void PredicatedPropertyInjection()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().When(_ => false).Inject(x => x.StringProperty, (context, type) => "foo");
+            registry.Bind<SimpleClass>().To().When(_ => false).InjectProperty(x => x.StringProperty, (context, type) => "foo");
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNull(simpleClass);
         }
@@ -424,7 +446,7 @@ namespace SexyInject.Tests
         public void PropertyInjectionJustContext()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().Inject(x => x.StringProperty, type => "foo");
+            registry.Bind<SimpleClass>().To().InjectProperty(x => x.StringProperty, type => "foo");
             var simpleClass = registry.Get<SimpleClass>();
             Assert.AreEqual("foo", simpleClass.StringProperty);
         }
@@ -433,7 +455,7 @@ namespace SexyInject.Tests
         public void PropertyInjectionInt()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().Inject(x => x.IntProperty, (context, type) => 5);
+            registry.Bind<SimpleClass>().To().InjectProperty(x => x.IntProperty, (context, type) => 5);
             var simpleClass = registry.Get<SimpleClass>();
             Assert.AreEqual(5, simpleClass.IntProperty);
         }
@@ -442,7 +464,7 @@ namespace SexyInject.Tests
         public void PropertyInjectionImplicit()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().Inject(x => x.SomeInterface);
+            registry.Bind<SimpleClass>().To().InjectProperty(x => x.SomeInterface);
             registry.Bind<ISomeInterface>().To<SomeClass1>();
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass.SomeInterface);
@@ -452,7 +474,7 @@ namespace SexyInject.Tests
         public void FieldInjection()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To().Inject(x => x.BoolField, _ => true);
+            registry.Bind<SimpleClass>().To().InjectProperty(x => x.BoolField, _ => true);
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsTrue(simpleClass.BoolField);
         }
@@ -461,14 +483,14 @@ namespace SexyInject.Tests
         public void ReadonlyFieldInjectionThrows()
         {
             var registry = new Registry();
-            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyField, _ => DateTime.MinValue));
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().InjectProperty(x => x.ReadonlyField, _ => DateTime.MinValue));
         }
 
         [Test]
         public void ReadonlyPropertyInjectionThrows()
         {
             var registry = new Registry();
-            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().Inject(x => x.ReadonlyProperty, _ => "bar"));
+            Assert.Throws<ArgumentException>(() => registry.Bind<SimpleClass>().To().InjectProperty(x => x.ReadonlyProperty, _ => "bar"));
         }
 
         [Test]

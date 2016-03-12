@@ -6,6 +6,7 @@ namespace SexyInject.Tests.TestClasses
     {
         public string StringProperty { get; set; }
         public ISomeInterface SomeInterface { get; set; }
+        public SubClass SubClass { get; set; }
         public int IntProperty { get; set; }
         public bool BoolField;
         public readonly DateTime ReadonlyField = new DateTime(2016, 1, 1);
