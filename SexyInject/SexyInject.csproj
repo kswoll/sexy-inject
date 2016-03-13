@@ -48,7 +48,6 @@
     <Compile Include="Constructor.cs" />
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
-    <Compile Include="ConstructorResolverBindings.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="LambdaResolver.cs" />
     <Compile Include="PredicatedResolver.cs" />
