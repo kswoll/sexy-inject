@@ -43,11 +43,13 @@
     <Compile Include="ArgumentExtensions.cs" />
     <Compile Include="ArgumentType.cs" />
     <Compile Include="Binder.cs" />
+    <Compile Include="Cache.cs" />
     <Compile Include="CacheResolver.cs" />
     <Compile Include="ClassInjectionResolver.cs" />
     <Compile Include="Constructor.cs" />
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
+    <Compile Include="WhenResolvedResolver.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="LambdaResolver.cs" />
     <Compile Include="PredicatedResolver.cs" />

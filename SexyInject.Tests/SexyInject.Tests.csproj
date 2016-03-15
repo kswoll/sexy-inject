@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="BinderTests.cs" />
     <Compile Include="ConstrainingBindingsTests.cs" />
+    <Compile Include="PropertyBindingTests.cs" />
     <Compile Include="ResolveContextTests.cs" />
     <Compile Include="ResolverContextTests.cs" />
     <Compile Include="TestClasses\BaseClass.cs" />

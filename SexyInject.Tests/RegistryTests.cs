@@ -204,10 +204,40 @@ namespace SexyInject.Tests
         }
 
         [Test]
-        public void Cache()
+        public void InstancesAreSameWhenCached()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" }).Cache((context, targetType) => targetType);
+            ((Binder)registry.Bind<SimpleClass>()).To(x => new SimpleClass { StringProperty = "foo" }).Cache(Cache.ByType);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [Test]
+        public void InstancesAreSameWhenCachedJustType()
+        {
+            var registry = new Registry();
+            ((Binder)registry.Bind<SimpleClass>()).To(x => new SimpleClass { StringProperty = "foo" }).Cache(type => type);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [Test]
+        public void InstancesAreSameWhenCachedT()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" }).Cache(Cache.ByType);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+            Assert.AreSame(instance1, instance2);
+        }
+
+        [Test]
+        public void InstancesAreSameWhenCachedJustTypeT()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To(x => new SimpleClass { StringProperty = "foo" }).Cache(type => type);
             var instance1 = registry.Get<SimpleClass>();
             var instance2 = registry.Get<SimpleClass>();
             Assert.AreSame(instance1, instance2);
@@ -629,6 +659,75 @@ namespace SexyInject.Tests
             registry.Bind(typeof(GenericClass<>)).To(type => new GenericSubclass<string>());
             var instance = registry.Get<GenericSubclass<string>>();
             Assert.IsNotNull(instance);
+        }
+
+        [Test]
+        public void WhenResolvedT()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().WhenResolved(o => o.StringProperty = "foo");
+            var instance = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", instance.StringProperty);
+        }
+
+        [Test]
+        public void WhenResolvedTAndContext()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().WhenResolved((context, o) => o.StringProperty = "foo");
+            var instance = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", instance.StringProperty);
+        }
+
+        [Test]
+        public void WhenResolved()
+        {
+            var registry = new Registry();
+            ((Binder)registry.Bind<SimpleClass>()).To().WhenResolved(o => ((SimpleClass)o).StringProperty = "foo");
+            var instance = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", instance.StringProperty);
+        }
+
+        [Test]
+        public void WhenResolvedAndContext()
+        {
+            var registry = new Registry();
+            ((Binder)registry.Bind<SimpleClass>()).To().WhenResolved((context, o) => ((SimpleClass)o).StringProperty = "foo");
+            var instance = registry.Get<SimpleClass>();
+            Assert.AreEqual("foo", instance.StringProperty);
+        }
+
+        [Test]
+        public void WhenResolvedFalse()
+        {
+            var registry = new Registry();
+            ((Binder)registry.Bind<SimpleClass>()).To().When(_ => false).WhenResolved(o => ((SimpleClass)o).StringProperty = "foo");
+            var instance = registry.Get<SimpleClass>();
+            Assert.IsNull(instance);
+        }
+
+        [Test]
+        public void WhenResolvedAfterCacheIsInvokedEveryTime()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().Cache(Cache.Singleton).WhenResolved(x => x.IntProperty++);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+
+            Assert.AreSame(instance1, instance2);
+            Assert.AreEqual(2, instance1.IntProperty);
+        }
+
+        [Test]
+        public void WhenResolvedBeforeCacheIsInvokedOnce()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>().To().WhenResolved(x => x.IntProperty++).Cache(Cache.Singleton);
+            var instance1 = registry.Get<SimpleClass>();
+            var instance2 = registry.Get<SimpleClass>();
+
+            Assert.AreSame(instance1, instance2);
+            Assert.AreEqual(1, instance1.IntProperty);
         }
     }
 }
