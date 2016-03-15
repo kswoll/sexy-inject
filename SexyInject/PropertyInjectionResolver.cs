@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -14,11 +13,33 @@ namespace SexyInject
         private readonly Action<ResolveContext, object> setter;
 
         public PropertyInjectionResolver(IResolver resolver, LambdaExpression property, Func<ResolveContext, Type, object> factory)
+            : this(resolver, GetMemberInfo(property), factory)
         {
+        }
+
+        public PropertyInjectionResolver(IResolver resolver, MemberInfo memberInfo, Func<ResolveContext, Type, object> factory)
+        {
+            if (!(memberInfo is FieldInfo) && !(memberInfo is PropertyInfo))
+                throw new ArgumentException("Member must specify a property or field.", nameof(memberInfo));
+
             this.resolver = resolver;
 
             var contextParameter = Expression.Parameter(typeof(ResolveContext));
             var objectParameter = Expression.Parameter(typeof(object));
+
+            Type targetType = memberInfo.DeclaringType;
+            Expression target = Expression.Convert(objectParameter, targetType);
+            Expression member = Expression.MakeMemberAccess(target, memberInfo);
+            var memberType = (memberInfo as FieldInfo)?.FieldType ?? ((PropertyInfo)memberInfo).PropertyType;
+
+            Expression body = Expression.Assign(member, Expression.Convert(Expression.Invoke(Expression.Constant(factory), 
+                contextParameter, Expression.Constant(memberType)), memberType));
+            var lambda = Expression.Lambda<Action<ResolveContext, object>>(body, contextParameter, objectParameter);
+            setter = lambda.Compile();
+        }
+
+        private static MemberInfo GetMemberInfo(LambdaExpression property)
+        {
             var memberExpression = property.Body as MemberExpression;
             var memberInfo = memberExpression?.Member;
             if (memberExpression == null || memberInfo == null || property.Parameters.Count != 1 || memberExpression.Expression != property.Parameters[0])
@@ -27,14 +48,7 @@ namespace SexyInject
                 throw new ArgumentException($"Property {memberInfo.DeclaringType.FullName}.{memberInfo.Name} has no setter.");
             if ((memberInfo as FieldInfo)?.Attributes.HasFlag(FieldAttributes.InitOnly) ?? false)
                 throw new ArgumentException($"Field {memberInfo.DeclaringType.FullName}.{memberInfo.Name} is readonly.");
-
-            Type targetType = property.Parameters.Single().Type;
-            Expression target = Expression.Convert(objectParameter, targetType);
-            Expression member = Expression.MakeMemberAccess(target, memberInfo);
-
-            Expression body = Expression.Assign(member, Expression.Convert(Expression.Invoke(Expression.Constant(factory), contextParameter, Expression.Constant(memberExpression.Type)), memberExpression.Type));
-            var lambda = Expression.Lambda<Action<ResolveContext, object>>(body, contextParameter, objectParameter);
-            setter = lambda.Compile();
+            return memberInfo;
         }
 
         public bool TryResolve(ResolveContext context, Type targetType, out object result)

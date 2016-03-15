@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 
 namespace SexyInject
@@ -68,6 +67,26 @@ namespace SexyInject
         }
 
         /// <summary>
+        /// Same as To&lt;T&gt; -- but a more concise syntax when you want to resolve to the bound type and apply further
+        /// operators.
+        /// </summary>
+        public ResolverContext To(ConstructorSelector constructorSelector = null)
+        {
+            return To(Type, constructorSelector);
+        }
+
+        /// <summary>
+        /// Binds requests for the bound type to an instance of specified type.
+        /// </summary>
+        /// <param name="type">The type to which requests for the bound type should resolve</param>
+        /// <param name="constructorSelector">A callback to select the constructor on the specified type to use when instantiating 
+        /// it.  Defaults to null which results in the selection of the first constructor with the most number of parameters.</param>
+        public ResolverContext To(Type type, ConstructorSelector constructorSelector = null)
+        {
+            return AddResolver(new ConstructorResolver(type, constructorSelector));
+        }
+
+        /// <summary>
         /// Binds requests for T to an instance of TTarget.
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
@@ -75,7 +94,7 @@ namespace SexyInject
         /// results in the selection of the first constructor with the most number of parameters.</param>
         public ResolverContext To<TTarget>(ConstructorSelector constructorSelector = null)
         {
-            return AddResolver(new ConstructorResolver(typeof(TTarget)));
+            return To(typeof(TTarget), constructorSelector);
         }
 
         /// <summary>
@@ -171,9 +190,9 @@ namespace SexyInject
         /// Same as To&lt;T&gt; -- but a more concise syntax when you want to resolve to the bound type and apply further
         /// operators.
         /// </summary>
-        public ResolverContext<T> To()
+        public new ResolverContext<T> To(ConstructorSelector constructorSelector = null)
         {
-            return To<T>();
+            return To<T>(constructorSelector);
         }
     }
 }

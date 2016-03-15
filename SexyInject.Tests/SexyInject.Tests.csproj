@@ -53,6 +53,7 @@
     <Compile Include="TestClasses\ClassWithDependencyOnSimpleClass.cs" />
     <Compile Include="TestClasses\ConstructedGenericClass.cs" />
     <Compile Include="TestClasses\GenericClass.cs" />
+    <Compile Include="TestClasses\GenericSubclass.cs" />
     <Compile Include="TestClasses\IGenericInterface.cs" />
     <Compile Include="TestClasses\IConstructedGenericInterface.cs" />
     <Compile Include="TestClasses\ISimpleClass.cs" />

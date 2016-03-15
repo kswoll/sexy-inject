@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace SexyInject
 {
@@ -45,14 +47,73 @@ namespace SexyInject
         /// </summary>
         /// <param name="factory">Provides an instance of the dependency to inject</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext InjectArgument(Func<ResolveContext, Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, factory));
+        public ResolverContext Inject(Func<ResolveContext, Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, factory));
 
         /// <summary>
         /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
         /// </summary>
         /// <param name="factory">Provides an instance of the dependency to inject</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext InjectArgument(Func<Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, (context, type) => factory(type)));
+        public ResolverContext Inject(Func<Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, (context, type) => factory(type)));
+
+        /// <summary>
+        /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
+        /// </summary>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <param name="factory">Provides the dependency that should be injected into the specified property.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext InjectProperty(MemberInfo property, Func<ResolveContext, Type, object> factory)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context, type)));
+        }
+
+        /// <summary>
+        /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
+        /// </summary>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <param name="factory">Provides the dependency that should be injected into the specified property.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext InjectProperty(MemberInfo property, Func<ResolveContext, object> factory)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context)));
+        }
+
+        /// <summary>
+        /// Makes it so the specified property will be injected with an instance of its type.
+        /// </summary>
+        /// <param name="property">The property to which the dependency will be injected.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext InjectProperty(MemberInfo property)
+        {
+            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => context.Resolve(type)));
+        }
+
+        /// <summary>
+        /// Exactly the same as calling the InjectProperty overload that only accepts a property expression, 
+        /// but for each property you provide in the properties array.
+        /// </summary>
+        /// <param name="properties">The array of properties that should be injected with dependencies.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext InjectProperties(params MemberInfo[] properties)
+        {
+            foreach (var property in properties)
+                InjectProperty(property);
+            return this;
+        }
+
+        /// <summary>
+        /// Exactly the same as calling the InjectProperties overload that accepts an array of properties except
+        /// that that array is pre-populated with, by default, all the writable public properties of T.  You can
+        /// provide an alternate filter via predicate.
+        /// </summary>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext InjectProperties(Func<PropertyInfo, bool> filter = null)
+        {
+            filter = filter ?? (property => property.CanWrite && property.SetMethod.IsPublic);
+            var properties = Binder.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(filter).ToArray();
+            InjectProperties(properties);
+            return this;
+        }
 
         protected ResolverContext Decorate(Func<IResolver, IResolver> decorator)
         {
@@ -118,6 +179,18 @@ namespace SexyInject
         {
             foreach (var property in properties)
                 InjectProperty(property);
+            return this;
+        }
+
+        /// <summary>
+        /// Exactly the same as calling the InjectProperties overload that accepts an array of properties except
+        /// that that array is pre-populated with, by default, all the writable public properties of T.  You can
+        /// provide an alternate filter via predicate.
+        /// </summary>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public new ResolverContext<T> InjectProperties(Func<PropertyInfo, bool> filter = null)
+        {
+            base.InjectProperties(filter);
             return this;
         }
 
