@@ -6,7 +6,7 @@ namespace SexyInject
     public static class RegistryExtensions
     {
         /// <summary>
-        /// Binds all Func&lt;T&gt; to a factory implementation that will create an instance of T for you upon invocation.
+        /// Binds all <see cref="Func{T}" /> to a factory implementation that will create an instance of T for you upon invocation.
         /// </summary>
         public static void RegisterFactoryPattern(this Registry registry)
         {
@@ -17,8 +17,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Binds all Lazy&lt;T&gt; to an implementation that will use the registry to create the instance fo T when the value for the lazy
-        /// is requested.
+        /// Binds all <see cref="Func{T}" /> to a factory implementation that will create an instance of T for you upon invocation.
         /// </summary>
         public static void RegisterLazyPattern(this Registry registry)
         {

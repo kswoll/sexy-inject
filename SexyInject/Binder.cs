@@ -67,8 +67,8 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Same as To&lt;T&gt; -- but a more concise syntax when you want to resolve to the bound type and apply further
-        /// operators.
+        /// Same as <see cref="To{T}(ConstructorSelector)" /> -- but a more concise syntax when you want to resolve to the bound type 
+        /// and apply further operators without explicitly supplying the same type for which the binding is being registered.
         /// </summary>
         public ResolverContext To(ConstructorSelector constructorSelector = null)
         {
@@ -187,8 +187,8 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Same as To&lt;T&gt; -- but a more concise syntax when you want to resolve to the bound type and apply further
-        /// operators.
+        /// Same as <see cref="To{T}(ConstructorSelector)" /> -- but a more concise syntax when you want to resolve to the bound type 
+        /// and apply further operators without explicitly supplying the same type for which the binding is being registered.
         /// </summary>
         public new ResolverContext<T> To(ConstructorSelector constructorSelector = null)
         {
