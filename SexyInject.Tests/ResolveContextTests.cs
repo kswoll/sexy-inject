@@ -12,7 +12,7 @@ namespace SexyInject.Tests
         public void ConstructT()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To((context, type) => context.Construct<SimpleClass>());
+            registry.Bind<SimpleClass>(x => x.To((context, type) => context.Construct<SimpleClass>()));
             var simpleClass = registry.Get<SimpleClass>();
             Assert.IsNotNull(simpleClass);
         }
@@ -23,7 +23,7 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.RegisterImplicitPattern();
             var simpleClass = new SimpleClass();
-            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass(context.Construct<InjectionClass>(simpleClass)));
+            registry.Bind<SecondLevelInjectionClass>(x => x.To((context, type) => new SecondLevelInjectionClass(context.Construct<InjectionClass>(simpleClass))));
             var injectionClass = registry.Get<SecondLevelInjectionClass>();
             Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
         }
@@ -34,7 +34,7 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.RegisterImplicitPattern();
             var someClass1 = new SomeClass1();
-            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)), someClass1)));
+            registry.Bind<MultiConstructorDependent>(binder => binder.To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)), someClass1))));
             var instance = registry.Get<MultiConstructorDependent>();
             Assert.AreSame(someClass1, instance.MultiConstructorClass.SomeInterface);
         }
@@ -44,7 +44,7 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.Bind<SimpleClass>();
-            registry.Bind<InjectionClass>().To((context, type) => new InjectionClass(context.Resolve<SimpleClass>()));
+            registry.Bind<InjectionClass>(x => x.To((context, type) => new InjectionClass(context.Resolve<SimpleClass>())));
             var injectionClass = registry.Get<InjectionClass>();
             Assert.IsNotNull(injectionClass.SimpleClass);
         }
@@ -55,7 +55,7 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.RegisterImplicitPattern();
             var simpleClass = new SimpleClass();
-            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass(context.Resolve<InjectionClass>(simpleClass)));
+            registry.Bind<SecondLevelInjectionClass>(x => x.To((context, type) => new SecondLevelInjectionClass(context.Resolve<InjectionClass>(simpleClass))));
             var injectionClass = registry.Get<SecondLevelInjectionClass>();
             Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
         }
@@ -65,7 +65,7 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry.Bind<InjectionClass>().To().Inject((context, type) => new SomeClass1());
+            registry.Bind<InjectionClass>(x => x.To().Inject((context, type) => new SomeClass1()));
             var injectionClass = registry.Get<InjectionClass>();
             Assert.IsNotNull(injectionClass.SimpleClass);
         }
@@ -76,7 +76,7 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.RegisterImplicitPattern();
             var simpleClass = new SimpleClass();
-            registry.Bind<SecondLevelInjectionClass>().To((context, type) => new SecondLevelInjectionClass((InjectionClass)context.Resolve(typeof(InjectionClass), simpleClass)));
+            registry.Bind<SecondLevelInjectionClass>(x => x.To((context, type) => new SecondLevelInjectionClass((InjectionClass)context.Resolve(typeof(InjectionClass), simpleClass))));
             var injectionClass = registry.Get<SecondLevelInjectionClass>();
             Assert.AreSame(simpleClass, injectionClass.InjectionClass.SimpleClass);
         }
@@ -86,8 +86,8 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry.Bind<ISomeInterface>().To<SomeClass1>();
-            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)))));
+            registry.Bind<ISomeInterface>(x => x.To<SomeClass1>());
+            registry.Bind<MultiConstructorDependent>(binder => binder.To((context, type) => new MultiConstructorDependent(context.Construct<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface))))));
             var instance = registry.Get<MultiConstructorDependent>();
             Assert.IsNull(instance.MultiConstructorClass.SimpleClass);
             Assert.IsNotNull(instance.MultiConstructorClass.SomeInterface);
@@ -98,8 +98,8 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry.Bind<ISomeInterface>().To<SomeClass1>();
-            registry.Bind<MultiConstructorDependent>().To((context, type) => new MultiConstructorDependent((MultiConstructorClass)context.Construct(typeof(MultiConstructorClass), constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface)))));
+            registry.Bind<ISomeInterface>(x => x.To<SomeClass1>());
+            registry.Bind<MultiConstructorDependent>(binder => binder.To((context, type) => new MultiConstructorDependent((MultiConstructorClass)context.Construct(typeof(MultiConstructorClass), constructors => constructors.Single(x => x.GetParameters()[0].ParameterType == typeof(ISomeInterface))))));
             var instance = registry.Get<MultiConstructorDependent>();
             Assert.IsNull(instance.MultiConstructorClass.SimpleClass);
             Assert.IsNotNull(instance.MultiConstructorClass.SomeInterface);
@@ -110,11 +110,11 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             ResolveContext resolveContext = null;
-            registry.Bind<SimpleClass>().To((context, type) =>
+            registry.Bind<SimpleClass>(x => x.To((context, type) =>
             {
                 resolveContext = context;
                 return new SimpleClass();
-            });
+            }));
             registry.Get<SimpleClass>();
             Assert.AreSame(registry, resolveContext.Registry);            
         }
@@ -124,11 +124,11 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             Type parent = null;
-            registry.Bind<SimpleClass>().To((context, type) =>
+            registry.Bind<SimpleClass>(x => x.To((context, type) =>
             {
                 parent = context.GetCallerType(0);
                 return new SimpleClass();
-            });
+            }));
             registry.Bind<InjectionClass>();
             registry.Get<InjectionClass>();
             Assert.AreEqual(typeof(InjectionClass), parent);            
@@ -139,11 +139,11 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             Type parent = null;
-            registry.Bind<SimpleClass>().To((context, type) =>
+            registry.Bind<SimpleClass>(x => x.To((context, type) =>
             {
                 parent = context.GetCallerType(1);
                 return new SimpleClass();
-            });
+            }));
             registry.Bind<InjectionClass>();
             registry.Get<InjectionClass>();
             Assert.IsNull(parent);            
@@ -153,11 +153,11 @@ namespace SexyInject.Tests
         public void NullArgumentThrows()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To((context, type) =>
+            registry.Bind<SimpleClass>(x => x.To((context, type) =>
             {
                 Assert.Throws<ArgumentNullException>(() => context.InjectArgument(null));
                 return new SimpleClass();
-            });
+            }));
             registry.Get<SimpleClass>();
         }
 
@@ -165,12 +165,12 @@ namespace SexyInject.Tests
         public void DuplicateArgumentThrows()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>().To((context, type) =>
+            registry.Bind<SimpleClass>(x => x.To((context, type) =>
             {
                 context.InjectArgument("foo");
                 Assert.Throws<ArgumentException>(() => context.InjectArgument("bar"));
                 return new SimpleClass();
-            });
+            }));
             registry.Get<SimpleClass>();
         }
     }

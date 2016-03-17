@@ -79,8 +79,6 @@ namespace SexyInject
             if (!cache.TryGetValue(type, out result) && (!frames.LastOrDefault()?.TryGetArgument(type, out result) ?? true))
             {
                 result = ProcessFrame(type, arguments, () => resolver(type));
-                if (Registry.Bind(type).CachePolicy == CachePolicy.Transient) 
-                    cache[type] = result;
             }
             return result;
         }

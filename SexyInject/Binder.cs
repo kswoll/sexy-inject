@@ -1,69 +1,31 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace SexyInject
 {
-    public class Binder 
+    public class Binder
     {
-        public Registry Registry { get; }
-        public Type Type { get; }
-        public CachePolicy CachePolicy { get; }
+        protected readonly Binding binding;
+        private bool isUsed;
 
-        private readonly object locker = new object();
-        private readonly ConcurrentQueue<ResolverContext> resolvers = new ConcurrentQueue<ResolverContext>();
-        private ConstructorResolver defaultResolver;
-        private int defaultResolverCreated;
-
-        public Binder(Registry registry, Type type, CachePolicy cachePolicy)
+        public Binder(Binding binding)
         {
-            Registry = registry;
-            Type = type;
-            CachePolicy = cachePolicy;
+            this.binding = binding;
         }
 
-        public ResolverContext AddResolver(IResolver resolver)
+        protected ResolverContext AddResolver(IResolver resolver)
         {
-            var context = new ResolverContext(Registry, this, resolver);
-            resolvers.Enqueue(context);
+            var context = new ResolverContext(binding.Registry, binding, resolver);
+            AddResolverContext(context);
             return context;
         }
 
         protected void AddResolverContext(ResolverContext context)
         {
-            resolvers.Enqueue(context);
-        }
+            if (isUsed)
+                throw new InvalidOperationException("Cannot call To more than once on the same binding.");
+            isUsed = true;
 
-        public IEnumerable<IResolver> Resolvers => resolvers.Select(x => x.Resolver);
-
-        public object Resolve(ResolveContext context, Type targetType)
-        {
-            object result;
-            bool hasResolvers = false;
-            foreach (var resolver in Resolvers)
-            {
-                hasResolvers = true;
-                if (resolver.TryResolve(context, targetType, out result))
-                    return result;
-            }
-            if (hasResolvers)
-                return null;
-
-            if (Interlocked.CompareExchange(ref defaultResolverCreated, 0, 1) != 2)
-            {
-                lock (locker)
-                {
-                    if (defaultResolver == null)
-                    {
-                        defaultResolver = new ConstructorResolver(Type);
-                        Interlocked.Exchange(ref defaultResolverCreated, 2);                        
-                    }
-                }
-            }
-            defaultResolver.TryResolve(context, targetType, out result);
-            return result;
+            binding.AddResolverContext(context);
         }
 
         /// <summary>
@@ -72,7 +34,16 @@ namespace SexyInject
         /// </summary>
         public ResolverContext To(ConstructorSelector constructorSelector = null)
         {
-            return To(Type, constructorSelector);
+            return To(binding.Type, constructorSelector);
+        }
+
+        /// <summary>
+        /// Binds requests for the bound type to an instance of specified type.
+        /// </summary>
+        /// <param name="type">The type to which requests for the bound type should resolve</param>
+        public ResolverContext To(Type type)
+        {
+            return AddResolver(new ConstructorResolver(type, null));
         }
 
         /// <summary>
@@ -81,7 +52,7 @@ namespace SexyInject
         /// <param name="type">The type to which requests for the bound type should resolve</param>
         /// <param name="constructorSelector">A callback to select the constructor on the specified type to use when instantiating 
         /// it.  Defaults to null which results in the selection of the first constructor with the most number of parameters.</param>
-        public ResolverContext To(Type type, ConstructorSelector constructorSelector = null)
+        public ResolverContext To(Type type, ConstructorSelector constructorSelector)
         {
             return AddResolver(new ConstructorResolver(type, constructorSelector));
         }
@@ -90,9 +61,18 @@ namespace SexyInject
         /// Binds requests for T to an instance of TTarget.
         /// </summary>
         /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
+        public ResolverContext To<TTarget>()
+        {
+            return To(typeof(TTarget), null);
+        }
+
+        /// <summary>
+        /// Binds requests for T to an instance of TTarget.
+        /// </summary>
+        /// <typeparam name="TTarget">The subclass of T (or T itself) to instantiate when an instance of T is requested.</typeparam>
         /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        public ResolverContext To<TTarget>(ConstructorSelector constructorSelector = null)
+        public ResolverContext To<TTarget>(ConstructorSelector constructorSelector)
         {
             return To(typeof(TTarget), constructorSelector);
         }
@@ -126,17 +106,18 @@ namespace SexyInject
         {
             return AddResolver(new LambdaResolver((context, type) => instance));
         }        
+        
     }
 
     public class Binder<T> : Binder
     {
-        public Binder(Registry registry, CachePolicy cachePolicy) : base(registry, typeof(T), cachePolicy)
+        public Binder(Binding binding) : base(binding)
         {
         }
 
         public new ResolverContext<T> AddResolver(IResolver resolver)
         {
-            var context = new ResolverContext<T>(Registry, this, resolver);
+            var context = new ResolverContext<T>(binding.Registry, binding, resolver);
             AddResolverContext(context);
             return context;
         }

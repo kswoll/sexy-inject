@@ -7,22 +7,19 @@ namespace SexyInject
     /// <summary>
     /// Injects dependencies into a specific property by using a factory function to resolve the dependency.
     /// </summary>
-    public class PropertyInjectionResolver : IResolver
+    public class PropertyInjectionResolver : IResolverOperator
     {
-        private readonly IResolver resolver;
         private readonly Action<ResolveContext, object> setter;
 
-        public PropertyInjectionResolver(IResolver resolver, LambdaExpression property, Func<ResolveContext, Type, object> factory)
-            : this(resolver, GetMemberInfo(property), factory)
+        public PropertyInjectionResolver(LambdaExpression property, Func<ResolveContext, Type, object> factory)
+            : this(GetMemberInfo(property), factory)
         {
         }
 
-        public PropertyInjectionResolver(IResolver resolver, MemberInfo memberInfo, Func<ResolveContext, Type, object> factory)
+        public PropertyInjectionResolver(MemberInfo memberInfo, Func<ResolveContext, Type, object> factory)
         {
             if (!(memberInfo is FieldInfo) && !(memberInfo is PropertyInfo))
                 throw new ArgumentException("Member must specify a property or field.", nameof(memberInfo));
-
-            this.resolver = resolver;
 
             var contextParameter = Expression.Parameter(typeof(ResolveContext));
             var objectParameter = Expression.Parameter(typeof(object));
@@ -51,9 +48,9 @@ namespace SexyInject
             return memberInfo;
         }
 
-        public bool TryResolve(ResolveContext context, Type targetType, out object result)
+        public bool TryResolve(ResolveContext context, Type targetType, ResolverProcessor resolverProcessor, out object result)
         {
-            if (resolver.TryResolve(context, targetType, out result))
+            if (resolverProcessor(context, targetType, out result))
             {
                 setter(context, result);
                 return true;

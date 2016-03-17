@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,57 +12,126 @@ namespace SexyInject
     public class ResolverContext
     {
         public Registry Registry { get; }
-        public Binder Binder { get; }
-        public IResolver Resolver { get; private set; }
+        public Binding Binding { get; }
+        public IResolver Resolver { get; }
+        public IReadOnlyList<IResolverOperator> Operators => operators;
 
-        public ResolverContext(Registry registry, Binder binder, IResolver resolver)
+        private readonly List<IResolverOperator> operators = new List<IResolverOperator>();
+
+        public ResolverContext(Registry registry, Binding binding, IResolver resolver)
         {
             Registry = registry;
-            Binder = binder;
+            Binding = binding;
             Resolver = resolver;
         }
 
-        /// <summary>
-        /// Constrains the resolver to only be applied when the specified predicate is satisfied.
-        /// </summary>
-        /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
-        /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext When(Func<ResolveContext, Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, predicate));
+        private void SpliceHeadOperators(Action action)
+        {
+            var currentOperatorCount = operators.Count;
+            action();
+            var newOperatorsCount = operators.Count - currentOperatorCount;
+            if (newOperatorsCount > 0)
+            {
+                var newOperators = new IResolverOperator[newOperatorsCount];
+                for (int i = currentOperatorCount, j = 0; i < operators.Count; i++, j++)
+                    newOperators[j] = operators[i];
+                operators.RemoveRange(currentOperatorCount, newOperatorsCount);
+                operators.InsertRange(0, newOperators);
+            }            
+        }
+
+        internal void Close()
+        {
+            SpliceHeadOperators(() =>
+            {
+                foreach (var globalOperator in Registry.GlobalOperators)
+                {
+                    globalOperator.AddHeadOperators(this);
+                }                
+            });
+            foreach (var globalOperator in Registry.GlobalOperators)
+            {
+                globalOperator.AddTailOperators(this);
+            }
+        }
+
+        internal void AddGlobalOperator(IGlobalResolverOperator @operator)
+        {
+            SpliceHeadOperators(() => @operator.AddHeadOperators(this));
+            @operator.AddTailOperators(this);
+        }
+
+        private ResolverProcessor GetResolverProcessor()
+        {
+            var executed = false;
+            return (ResolveContext context, Type type, out object result) =>
+            {
+                if (executed)
+                    throw new InvalidOperationException("An operator may only call the resolver processor one time.");
+                executed = true;
+
+                return Resolver.TryResolve(context, type, out result);
+            };
+        }
+
+        private ResolverProcessor GetOperatorProcessor(int index)
+        {
+            var executed = false;
+            return (ResolveContext context, Type type, out object result) =>
+            {
+                if (executed)
+                    throw new InvalidOperationException("An operator may only call the resolver processor one time.");
+                executed = true;
+
+                ResolverProcessor nextProcessor = index > 0 ? GetOperatorProcessor(index - 1) : GetResolverProcessor();
+                var @operator = Operators[index];
+                return @operator.TryResolve(context, type, nextProcessor, out result);
+            };
+        }
+
+        public ResolverProcessor ResolverProcessor => Operators.Any() ? GetOperatorProcessor(Operators.Count - 1) : GetResolverProcessor();
 
         /// <summary>
         /// Constrains the resolver to only be applied when the specified predicate is satisfied.
         /// </summary>
         /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext When(Func<Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, (context, type) => predicate(type)));
+        public ResolverContext When(Func<ResolveContext, Type, bool> predicate) => AddOperator(new PredicatedResolver(predicate));
+
+        /// <summary>
+        /// Constrains the resolver to only be applied when the specified predicate is satisfied.
+        /// </summary>
+        /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
+        /// <returns>This context to facilitate fluent syntax</returns>
+        public ResolverContext When(Func<Type, bool> predicate) => AddOperator(new PredicatedResolver((context, type) => predicate(type)));
 
         /// <summary>
         /// Cache values returned by the resolver based on the key generated by the specified keyGenerator.
         /// </summary>
         /// <param name="keySelector">The result of this selector will be used as the key in the dictionary cache.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext Cache(Func<ResolveContext, Type, object> keySelector) => Decorate(x => new CacheResolver(x, keySelector));
+        public ResolverContext Cache(Func<ResolveContext, Type, object> keySelector) => AddOperator(new CacheResolver(keySelector));
 
         /// <summary>
         /// Cache values returned by the resolver based on the key generated by the specified keyGenerator.
         /// </summary>
         /// <param name="keySelector">The result of this selector will be used as the key in the dictionary cache.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext Cache(Func<Type, object> keySelector) => Decorate(x => new CacheResolver(x, (context, type) => keySelector(type)));
+        public ResolverContext Cache(Func<Type, object> keySelector) => AddOperator(new CacheResolver((context, type) => keySelector(type)));
 
         /// <summary>
         /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
         /// </summary>
         /// <param name="factory">Provides an instance of the dependency to inject</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext Inject(Func<ResolveContext, Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, factory));
+        public ResolverContext Inject(Func<ResolveContext, Type, object> factory) => AddOperator(new ClassInjectionResolver(factory));
 
         /// <summary>
         /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
         /// </summary>
         /// <param name="factory">Provides an instance of the dependency to inject</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public ResolverContext Inject(Func<Type, object> factory) => Decorate(x => new ClassInjectionResolver(x, (context, type) => factory(type)));
+        public ResolverContext Inject(Func<Type, object> factory) => AddOperator(new ClassInjectionResolver((context, type) => factory(type)));
 
         /// <summary>
         /// For the current binding only, uses the instance provided by the specified factory to resolve any dependencies.
@@ -71,7 +141,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext InjectProperty(MemberInfo property, Func<ResolveContext, Type, object> factory)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context, type)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => factory(context, type)));
         }
 
         /// <summary>
@@ -82,7 +152,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext InjectProperty(MemberInfo property, Func<ResolveContext, object> factory)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => factory(context)));
         }
 
         /// <summary>
@@ -92,7 +162,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext InjectProperty(MemberInfo property)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => context.Resolve(type)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => context.Resolve(type)));
         }
 
         /// <summary>
@@ -117,7 +187,7 @@ namespace SexyInject
         public ResolverContext InjectProperties(Func<PropertyInfo, bool> filter = null)
         {
             filter = filter ?? (property => property.CanWrite && property.SetMethod.IsPublic);
-            var properties = Binder.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(filter).ToArray();
+            var properties = Binding.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(filter).ToArray();
             InjectProperties(properties);
             return this;
         }
@@ -132,7 +202,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext WhenResolved(Action<ResolveContext, object> handler)
         {
-            return Decorate(x => new WhenResolvedResolver(x, handler));
+            return AddOperator(new WhenResolvedResolver(handler));
         }
 
         /// <summary>
@@ -145,12 +215,12 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext WhenResolved(Action<object> handler)
         {
-            return Decorate(x => new WhenResolvedResolver(x, (context, o) => handler(o)));
+            return AddOperator(new WhenResolvedResolver((context, o) => handler(o)));
         }
 
-        protected ResolverContext Decorate(Func<IResolver, IResolver> decorator)
+        public ResolverContext AddOperator(IResolverOperator @operator)
         {
-            Resolver = decorator(Resolver);
+            operators.Add(@operator);
             return this;
         }
     }
@@ -161,9 +231,7 @@ namespace SexyInject
     /// <typeparam name="T">The type to which the binding will resolve.</typeparam>
     public class ResolverContext<T> : ResolverContext
     {
-        public new Binder<T> Binder => (Binder<T>)base.Binder;
-
-        public ResolverContext(Registry registry, Binder<T> binder, IResolver resolver) : base(registry, binder, resolver)
+        public ResolverContext(Registry registry, Binding binding, IResolver resolver) : base(registry, binding, resolver)
         {
         }
 
@@ -176,7 +244,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> InjectProperty<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, Type, TValue> factory)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context, type)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => factory(context, type)));
         }
 
         /// <summary>
@@ -188,7 +256,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> InjectProperty<TValue>(Expression<Func<T, TValue>> property, Func<ResolveContext, TValue> factory)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => factory(context)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => factory(context)));
         }
 
         /// <summary>
@@ -199,7 +267,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> InjectProperty<TValue>(Expression<Func<T, TValue>> property)
         {
-            return Decorate(x => new PropertyInjectionResolver(x, property, (context, type) => context.Resolve(type)));
+            return AddOperator(new PropertyInjectionResolver(property, (context, type) => context.Resolve(type)));
         }
 
         /// <summary>
@@ -232,14 +300,14 @@ namespace SexyInject
         /// </summary>
         /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public new ResolverContext<T> When(Func<ResolveContext, Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, predicate));
+        public new ResolverContext<T> When(Func<ResolveContext, Type, bool> predicate) => AddOperator(new PredicatedResolver(predicate));
 
         /// <summary>
         /// Constrains the resolver to only be applied when the specified predicate is satisfied.
         /// </summary>
         /// <param name="predicate">When this predicate returns true for a given resolution request, the resolver will be used.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public new ResolverContext<T> When(Func<Type, bool> predicate) => Decorate(x => new PredicatedResolver(x, (context, type) => predicate(type)));
+        public new ResolverContext<T> When(Func<Type, bool> predicate) => AddOperator(new PredicatedResolver((context, type) => predicate(type)));
 
 
         /// <summary>
@@ -247,14 +315,14 @@ namespace SexyInject
         /// </summary>
         /// <param name="keySelector">The result of this selector will be used as the key in the dictionary cache.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public new ResolverContext<T> Cache(Func<ResolveContext, Type, object> keySelector) => Decorate(x => new CacheResolver(x, keySelector));
+        public new ResolverContext<T> Cache(Func<ResolveContext, Type, object> keySelector) => AddOperator(new CacheResolver(keySelector));
 
         /// <summary>
         /// Cache values returned by the resolver based on the key generated by the specified keyGenerator.
         /// </summary>
         /// <param name="keySelector">The result of this selector will be used as the key in the dictionary cache.</param>
         /// <returns>This context to facilitate fluent syntax</returns>
-        public new ResolverContext<T> Cache(Func<Type, object> keySelector) => Decorate(x => new CacheResolver(x, (context, type) => keySelector(type)));
+        public new ResolverContext<T> Cache(Func<Type, object> keySelector) => AddOperator(new CacheResolver((context, type) => keySelector(type)));
 
         /// <summary>
         /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is 
@@ -266,7 +334,7 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext<T> WhenResolved(Action<ResolveContext, T> handler)
         {
-            return Decorate(x => new WhenResolvedResolver(x, (context, o) => handler(context, (T)o)));
+            return AddOperator(new WhenResolvedResolver((context, o) => handler(context, (T)o)));
         }
 
         /// <summary>
@@ -279,12 +347,12 @@ namespace SexyInject
         /// <returns>This context to facilitate fluent syntax</returns>
         public ResolverContext WhenResolved(Action<T> handler)
         {
-            return Decorate(x => new WhenResolvedResolver(x, (context, o) => handler((T)o)));
+            return AddOperator(new WhenResolvedResolver((context, o) => handler((T)o)));
         }
 
-        protected new ResolverContext<T> Decorate(Func<IResolver, IResolver> decorator)
+        public new ResolverContext<T> AddOperator(IResolverOperator @operator)
         {
-            return (ResolverContext<T>)base.Decorate(decorator);
+            return (ResolverContext<T>)base.AddOperator(@operator);
         }
     }
 }

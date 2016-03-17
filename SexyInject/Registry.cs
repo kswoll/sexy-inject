@@ -10,17 +10,26 @@ namespace SexyInject
     public class Registry
     {
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2 && x.GetParameters()[1].ParameterType == typeof(Argument[]));
-        private readonly ConcurrentDictionary<Type, Binder> binders = new ConcurrentDictionary<Type, Binder>();
+        private readonly ConcurrentDictionary<Type, Binding> bindings = new ConcurrentDictionary<Type, Binding>();
         private readonly ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>>();
+        private readonly ConcurrentQueue<IGlobalResolverOperator> globalOperators = new ConcurrentQueue<IGlobalResolverOperator>();
 
-        public Binder<T> Bind<T>(CachePolicy cachePolicy = CachePolicy.Transient)
+        public IEnumerable<IGlobalResolverOperator> GlobalOperators => globalOperators;
+
+        public void Bind<T>(Func<Binder<T>, ResolverContext> binder = null)
         {
-            return (Binder<T>)binders.GetOrAdd(typeof(T), x => new Binder<T>(this, cachePolicy));
+            binder = binder ?? (x => x.To<T>());
+            var binding = bindings.GetOrAdd(typeof(T), x => new Binding(this, x));
+            var context = binder(new Binder<T>(binding));
+            context.Close();
         }
 
-        public Binder Bind(Type type, CachePolicy cachePolicy = CachePolicy.Transient)
+        public void Bind(Type type, Func<Binder, ResolverContext> binder = null)
         {
-            return binders.GetOrAdd(type, x => new Binder(this, type, cachePolicy));
+            binder = binder ?? (x => x.To(type));
+            var binding = bindings.GetOrAdd(type, x => new Binding(this, x));
+            var context = binder(new Binder(binding));
+            context.Close();
         }
 
         public T Get<T>()
@@ -113,6 +122,28 @@ namespace SexyInject
             return Construct(CreateResolverContext(arguments.Where(x => x.ArgumentType == ArgumentType.Pooled).Select(x => x.Value)), type, constructorSelector, arguments.Where(x => x.ArgumentType == ArgumentType.Unpooled).Select(x => x.Value).ToArray());
         }
 
+        public void AddGlobalHeadOperator(Func<ResolverContext, ResolverContext> @operator)
+        {
+            AddGlobalOperator(new LambdaGlobalResolverOperator(headOperators: @operator));
+        }
+
+        public void AddGlobalTailOperator(Func<ResolverContext, ResolverContext> @operator)
+        {
+            AddGlobalOperator(new LambdaGlobalResolverOperator(tailOperators: @operator));
+        }
+
+        public void AddGlobalOperator(IGlobalResolverOperator @operator)
+        {
+            globalOperators.Enqueue(@operator);
+            foreach (var binding in bindings.Values)
+            {
+                foreach (var context in binding.ResolverContexts)
+                {
+                    context.AddGlobalOperator(@operator);
+                }
+            }
+        }
+
         private object Construct(ResolveContext context, Type type, ConstructorSelector constructorSelector, object[] arguments)
         {
             return context.Construct(type, constructorSelector, arguments);
@@ -124,23 +155,23 @@ namespace SexyInject
             context = new ResolveContext(
                 this,
                 x => Resolve(context, x), 
-                (type, constructorSelector) => factoryCache.GetOrAdd(Tuple.Create(type, constructorSelector), x => FactoryGenerator(x.Item1, x.Item2))(context)
-                , arguments);
+                (type, constructorSelector) => factoryCache.GetOrAdd(Tuple.Create(type, constructorSelector), x => FactoryGenerator(x.Item1, x.Item2))(context), 
+                arguments);
             return context;
         }
 
         private object Resolve(ResolveContext context, Type type)
         {
-            Binder binder = null;
+            Binding binding = null;
             foreach (var current in context.EnumerateTypeHierarchy(type))
             {
-                if (binders.TryGetValue(current, out binder))
+                if (bindings.TryGetValue(current, out binding))
                     break;
             }
-            if (binder == null)
+            if (binding == null)
                 throw new RegistryException($"The type {type.FullName} has not been registered and AllowImplicitRegistration is disabled.");
 
-            return binder.Resolve(context, type);            
+            return binding.Resolve(context, type);            
         }
 
         private object Get(ResolveContext context, Type type, object[] arguments)

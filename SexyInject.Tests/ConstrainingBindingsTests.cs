@@ -10,14 +10,12 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry
-                .Bind<StringClass>()
+            registry.Bind<StringClass>(x => x
                 .To(_ => new StringClass("value1"))
-                .When((context, targetType) => context.CallerType == typeof(Consumer1));
-            registry
-                .Bind<StringClass>()
+                .When((context, targetType) => context.CallerType == typeof(Consumer1)));
+            registry.Bind<StringClass>(x => x
                 .To(_ => new StringClass("value2"))
-                .When((context, targetType) => context.CallerType == typeof(Consumer2));
+                .When((context, targetType) => context.CallerType == typeof(Consumer2)));
 
             var consumer1 = registry.Get<Consumer1>();
             var consumer2 = registry.Get<Consumer2>();

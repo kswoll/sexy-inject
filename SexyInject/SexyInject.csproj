@@ -42,6 +42,7 @@
     <Compile Include="Argument.cs" />
     <Compile Include="ArgumentExtensions.cs" />
     <Compile Include="ArgumentType.cs" />
+    <Compile Include="Binding.cs" />
     <Compile Include="Binder.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="CacheResolver.cs" />
@@ -49,6 +50,10 @@
     <Compile Include="Constructor.cs" />
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
+    <Compile Include="IGlobalResolverOperator.cs" />
+    <Compile Include="IResolverOperator.cs" />
+    <Compile Include="LambdaGlobalResolverOperator.cs" />
+    <Compile Include="ResolverProcessor.cs" />
     <Compile Include="WhenResolvedResolver.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="LambdaResolver.cs" />
@@ -61,7 +66,6 @@
     <Compile Include="RegistryException.cs" />
     <Compile Include="ResolveContextFrame.cs" />
     <Compile Include="ResolverContext.cs" />
-    <Compile Include="CachePolicy.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

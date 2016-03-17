@@ -10,9 +10,9 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.Bind<Dependency>();
-            registry.Bind<PropertyClass>().To()
+            registry.Bind<PropertyClass>(binder => binder.To()
                 .InjectProperty(x => x.Dependency)
-                .InjectProperty(x => x.String, _ => "foo");
+                .InjectProperty(x => x.String, _ => "foo"));
 
             var instance = registry.Get<PropertyClass>();
             Assert.IsNotNull(instance.Dependency);
@@ -24,8 +24,8 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.Bind<Dependency>();
-            registry.Bind<string>().To(type => "foo");
-            registry.Bind<PropertyClass>().To().InjectProperties();
+            registry.Bind<string>(binder => binder.To(type => "foo"));
+            registry.Bind<PropertyClass>(binder => binder.To().InjectProperties());
 
             var instance = registry.Get<PropertyClass>();
             Assert.IsNotNull(instance.Dependency);
