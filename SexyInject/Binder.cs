@@ -131,7 +131,7 @@ namespace SexyInject
         public new ResolverContext<T> To<TTarget>(ConstructorSelector constructorSelector = null)
             where TTarget : T
         {
-            return AddResolver(new ConstructorResolver(typeof(TTarget)));
+            return AddResolver(new ConstructorResolver(typeof(TTarget), constructorSelector));
         }
 
         /// <summary>

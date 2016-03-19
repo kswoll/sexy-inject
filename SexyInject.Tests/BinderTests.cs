@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using SexyInject.Tests.TestClasses;
 
@@ -86,6 +88,26 @@ namespace SexyInject.Tests
                 return result;
             });
             registry.Get<SimpleClass>();
+        }
+
+        [Test]
+        public void BaseBinderToWithConstructorProviderT()
+        {
+            var registry = new Registry();
+            registry.Bind<ISomeInterface>(x => x.To<SomeClass1>());
+            registry.Bind<MultiConstructorClass>(binder => ((Binder)binder).To<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType.IsInterface)));
+            var instance = registry.Get<MultiConstructorClass>();
+            Assert.IsNotNull(instance.SomeInterface);
+        }
+
+        [Test]
+        public void ToWithConstructorProviderT()
+        {
+            var registry = new Registry();
+            registry.Bind<ISomeInterface>(x => x.To<SomeClass1>());
+            registry.Bind<MultiConstructorClass>(binder => binder.To<MultiConstructorClass>(constructors => constructors.Single(x => x.GetParameters()[0].ParameterType.IsInterface)));
+            var instance = registry.Get<MultiConstructorClass>();
+            Assert.IsNotNull(instance.SomeInterface);
         }
     }
 }

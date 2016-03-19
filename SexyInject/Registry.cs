@@ -169,7 +169,7 @@ namespace SexyInject
                     break;
             }
             if (binding == null)
-                throw new RegistryException($"The type {type.FullName} has not been registered and AllowImplicitRegistration is disabled.");
+                throw new RegistryException($"The type {type.FullName} has not been registered.");
 
             return binding.Resolve(context, type);            
         }

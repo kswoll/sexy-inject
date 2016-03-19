@@ -52,7 +52,7 @@ namespace SexyInject
         /// <param name="registry">The registry on which to apply this pattern.</param>
         public static void RegisterTransientCachingPattern(this Registry registry)
         {
-            registry.AddGlobalTailOperator(x => x.Cache((context, type) => Tuple.Create(context, type)));
+            registry.AddGlobalTailOperator(x => x.Cache(Cache.Transient));
         }
     }
 }

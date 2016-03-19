@@ -27,6 +27,14 @@ namespace SexyInject.Tests
             Assert.Throws<InvalidOperationException>(() => registry.Get<SimpleClass>());
         }
 
+        [Test]
+        public void ResolverProcessorCalledMoreThanOnceForOperatorThrows()
+        {
+            var registry = new Registry();
+            registry.Bind<SimpleClass>(x => x.To().Cache(Cache.Singleton).AddOperator(new TestOperator()));
+            Assert.Throws<InvalidOperationException>(() => registry.Get<SimpleClass>());
+        }
+
         private class TestOperator : IResolverOperator
         {
             public bool TryResolve(ResolveContext context, Type targetType, ResolverProcessor resolverProcessor, out object result)
