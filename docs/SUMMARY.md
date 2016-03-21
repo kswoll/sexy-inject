@@ -5,4 +5,6 @@
   * [Associating an Interface with its Implementation](registry/interfaces.md)
   * [Explicit Registration](registry/explicit.md)
   * [Explicit Registration](registry/explicit.md)
-  * 
+  * [Resolving Using a Method or Lambda](registry/lambda.md)
+  * [Generalizing Registration](registry/generlizing.md)
+  * [Constraining Registration](registry/constraining.md)
