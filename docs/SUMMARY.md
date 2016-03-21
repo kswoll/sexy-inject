@@ -1,3 +1,3 @@
 # Table of content
 
-* [Registry](registry.md)
+* [Registry](registry/README.md)
