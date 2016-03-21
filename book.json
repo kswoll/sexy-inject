@@ -1,5 +1,6 @@
 {
   "title": "SexyInject",
+  "gitbook": ">=3.0.0-pre.0",
   "root": "./docs",
   "description": "An especially attractive .NET dependency injection library"
 }
