@@ -42,6 +42,10 @@ That being said, that is ignoring probably the most ubiquitous use-case for DI, 
     
 Here we say that for any request for an instance of the interface `IFoo`, provide an instance of the class `Foo` (which *must* implement that interface -- the generic type constraints will enforce this).
 
+### Full Documentation
+
+To read the documentation in full, visit the [project's GitBook site](https://kswoll.gitbooks.io/sexy-inject/content/).
+
 ## Registry
 
 The main class you interact with is an instance of `Registry`.   It is here where you specify how requests for some type `T` should be handled.  You might, for example, want to register an interface to resolve to some particular implementation. Or, you might want all requests for a type to resolve into the same instance (a singleton pattern).  Or all requests for an instantiatable type (i.e. non-abstract, etc.) to result in an instance of that type.  
