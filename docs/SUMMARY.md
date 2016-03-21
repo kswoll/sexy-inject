@@ -6,5 +6,5 @@
   * [Explicit Registration](registry/explicit.md)
   * [Explicit Registration](registry/explicit.md)
   * [Resolving Using a Method or Lambda](registry/lambda.md)
-  * [Constraining Registration](registry/constraining.md)
+  * [Constraining Bindings](registry/constraining.md)
   * [Generalizing Registration](registry/generlizing.md)
