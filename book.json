@@ -3,7 +3,7 @@
   "root": "./docs",
   "gitbook": "2.5.2",
   "structure": {
-    "readme": "./README.md",
+    "readme": "docs/README.md",
     "summary": "docs/SUMMARY.md"
   }
 }
