@@ -9,3 +9,5 @@
   * [Constraining Bindings](registry/constraining.md)
   * [Generalizing Registration](registry/generlizing.md)
   * [Caching](registry/caching.md)
+  * [Property Injection](registry/properties.md)
+  * [Custom Behavior](registry/custom-behavior.md)
