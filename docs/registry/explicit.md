@@ -1,4 +1,4 @@
-## Explicit Injection
+# Explicit Injection
 
 You can also inject dependencies explicitly using the `InjectArgument` operator.  This allows you to provide an instance of an object and make it available as a dependency to inject into the bound type.
 
