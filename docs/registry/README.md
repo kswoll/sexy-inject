@@ -16,7 +16,7 @@ var registry = new Registry();
 registry.RegisterFactoryPattern();
 ```
 
-## Minimum Registration
+
 
 
 
