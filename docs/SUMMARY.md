@@ -8,3 +8,4 @@
   * [Resolving Using a Method or Lambda](registry/lambda.md)
   * [Constraining Bindings](registry/constraining.md)
   * [Generalizing Registration](registry/generlizing.md)
+  * [Caching](registry/caching.md)
