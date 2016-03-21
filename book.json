@@ -2,6 +2,7 @@
   "title": "SexyInject",
   "root": "./docs",
   "gitbook": "2.5.2",
+  "description": "An especially attractive .NET dependency injection library",
   "structure": {
     "readme": "docs/README.md",
     "summary": "docs/SUMMARY.md"
