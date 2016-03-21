@@ -1,4 +1,5 @@
-But starting with a vanilla instance, what is the simplest possible example of binding something yourself?  Consider a class `Foo`:
+# Minimum Registration
+Starting with a vanilla instance, what is the simplest possible example of binding something yourself?  Consider a class `Foo`:
 
 ```
 public class Foo 
