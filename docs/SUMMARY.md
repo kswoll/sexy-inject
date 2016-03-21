@@ -11,3 +11,4 @@
   * [Caching](registry/caching.md)
   * [Property Injection](registry/properties.md)
   * [Custom Behavior](registry/custom-behavior.md)
+  * [Composition and Order of Operations](registry/order.md)
