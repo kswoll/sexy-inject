@@ -9,38 +9,6 @@ namespace SexyInject.Tests
     [TestFixture]
     public class BinderTests
     {
-/*
-        [Test]
-        public void AddResolverThroughBaseType()
-        {
-            var registry = new Registry();
-            registry.Bind<SimpleClass>(binder =>
-            {
-                binder.To().Cache(Cache.Singleton);
-                Assert.AreEqual(1, binder.)
-            });
-            Binder binding = new Binder<SimpleClass>(new Binding(registry, typeof(SimpleClass)), new Trigger());
-            var resolver = new TestResolver();
-            binding.AddResolver(resolver);
-            Assert.IsTrue(binding.Resolvers.Contains(resolver));
-        }
-
-*/
-        [Test]
-        public void RegistryProperty()
-        {
-            var registry = new Registry();
-            var binding = new Binding(registry, typeof(SimpleClass));
-            Assert.AreEqual(registry, binding.Registry);
-        }
-
-        [Test]
-        public void TypeProperty()
-        {
-            var binder = new Binding(new Registry(), typeof(string));
-            Assert.AreEqual(typeof(string), binder.Type);
-        }
-
         [Test]
         public void DefaultResolver()
         {

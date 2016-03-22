@@ -2,6 +2,13 @@
 
 namespace SexyInject
 {
+    /// <summary>
+    /// This is the first class you interact with in the body of your Bind handler.  It has a series of 
+    /// overloads of the method "To" that allows you to specify how the type will be resolved.  For example
+    /// you can specify a type and it will find a constructor to use.  Alternatively you may specify a 
+    /// lambda that returns an instance yourself.  Once you've invoked the To method, it returns an instance
+    /// of ResolverContext with which you can specify the details of the binding in depth.
+    /// </summary>
     public class Binder
     {
         protected readonly Binding binding;
@@ -43,7 +50,7 @@ namespace SexyInject
         /// <param name="type">The type to which requests for the bound type should resolve</param>
         public ResolverContext To(Type type)
         {
-            return AddResolver(new ConstructorResolver(type, null));
+            return AddResolver(new ConstructorResolver(type));
         }
 
         /// <summary>

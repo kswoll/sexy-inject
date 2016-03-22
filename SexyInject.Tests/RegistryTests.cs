@@ -231,7 +231,7 @@ namespace SexyInject.Tests
         public void InstancesAreSameWhenCached()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>(x => ((Binder)x).To(_ => new SimpleClass { StringProperty = "foo" }).Cache(Cache.ByType));
+            registry.Bind<SimpleClass>(x => ((Binder)x).To(_ => new SimpleClass { StringProperty = "foo" }).Cache(Cache.Singleton));
             var instance1 = registry.Get<SimpleClass>();
             var instance2 = registry.Get<SimpleClass>();
             Assert.AreSame(instance1, instance2);
@@ -251,7 +251,7 @@ namespace SexyInject.Tests
         public void InstancesAreSameWhenCachedT()
         {
             var registry = new Registry();
-            registry.Bind<SimpleClass>(x => x.To(_ => new SimpleClass { StringProperty = "foo" }).Cache(Cache.ByType));
+            registry.Bind<SimpleClass>(x => x.To(_ => new SimpleClass { StringProperty = "foo" }).Cache(Cache.Singleton));
             var instance1 = registry.Get<SimpleClass>();
             var instance2 = registry.Get<SimpleClass>();
             Assert.AreSame(instance1, instance2);

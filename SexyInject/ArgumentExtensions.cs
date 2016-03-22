@@ -2,7 +2,7 @@
 
 namespace SexyInject
 {
-    public static class ArgumentExtensions
+    internal static class ArgumentExtensions
     {
         public static Argument[] ToArguments(this object[] array, ArgumentType argumentType)
         {

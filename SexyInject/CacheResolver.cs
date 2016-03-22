@@ -3,6 +3,11 @@ using System.Collections.Concurrent;
 
 namespace SexyInject
 {
+    /// <summary>
+    /// Resolver used to implement the Cache operator.  It allows you to provide a key when resolving.  Only one
+    /// unique instance per key will be returned.  Think of the key like the key you use in the LINQ .GroupBy 
+    /// operator.
+    /// </summary>
     public class CacheResolver : IResolverOperator
     {
         private readonly Func<ResolveContext, Type, object> keySelector;

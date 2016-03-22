@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace SexyInject
 {
+    /// <summary>
+    /// This class is used internally by the registry to keep track of how each type should be resolved.  You 
+    /// should never need to interact with it directly.
+    /// </summary>
     public class Binding 
     {
         public Registry Registry { get; }
@@ -12,10 +16,9 @@ namespace SexyInject
 
         internal IEnumerable<ResolverContext> ResolverContexts => resolverContexts;
 
-        private readonly object locker = new object();
         private readonly ConcurrentQueue<ResolverContext> resolverContexts = new ConcurrentQueue<ResolverContext>();
 
-        public Binding(Registry registry, Type type)
+        internal Binding(Registry registry, Type type)
         {
             Registry = registry;
             Type = type;

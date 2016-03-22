@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace SexyInject
+﻿namespace SexyInject
 {
     public struct Argument
     {
