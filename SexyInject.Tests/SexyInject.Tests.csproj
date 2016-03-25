@@ -62,6 +62,7 @@
     <Compile Include="TestClasses\ISimpleClass.cs" />
     <Compile Include="TestClasses\MultiConstructorClass.cs" />
     <Compile Include="TestClasses\MultiConstructorDependent.cs" />
+    <Compile Include="TestClasses\PartialApplicationClass.cs" />
     <Compile Include="TestClasses\SecondLevelInjectionClass.cs" />
     <Compile Include="TestClasses\SimpleClass.cs" />
     <Compile Include="TestClasses\InjectionClass.cs" />

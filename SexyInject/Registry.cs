@@ -122,6 +122,11 @@ namespace SexyInject
             return Construct(CreateResolverContext(arguments.Where(x => x.ArgumentType == ArgumentType.Pooled).Select(x => x.Value)), type, constructorSelector, arguments.Where(x => x.ArgumentType == ArgumentType.Unpooled).Select(x => x.Value).ToArray());
         }
 
+        public T Construct<T>(Expression<Func<T>> constructor)
+        {
+            
+        }
+
         public void AddGlobalHeadOperator(Func<ResolverContext, ResolverContext> @operator, Func<ResolverContext, bool> predicate = null)
         {
             AddGlobalOperator(new LambdaGlobalResolverOperator(headOperators: @operator, headOperatorPredicate: predicate));

@@ -75,6 +75,7 @@
     <Compile Include="Emit\ShortInlineRInstruction.cs" />
     <Compile Include="Emit\ShortInlineVarInstruction.cs" />
     <Compile Include="IGlobalResolverOperator.cs" />
+    <Compile Include="InjectAttribute.cs" />
     <Compile Include="IResolverOperator.cs" />
     <Compile Include="LambdaGlobalResolverOperator.cs" />
     <Compile Include="ResolverProcessor.cs" />

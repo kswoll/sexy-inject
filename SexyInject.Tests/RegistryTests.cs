@@ -751,5 +751,13 @@ namespace SexyInject.Tests
             Assert.AreSame(instance1, instance2);
             Assert.AreEqual(1, instance1.IntProperty);
         }
+
+        [Test]
+        public void PartialApplicationConstructor()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Construct(() => new PartialApplicationClass(1, 2, "foo", "bar"));
+        }
     }
 }
