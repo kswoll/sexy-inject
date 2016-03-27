@@ -1,10 +1,11 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class InlineVarInstruction : ILInstruction
     {
-        internal InlineVarInstruction(int offset, OpCode opCode, ushort ordinal) : base(offset, opCode)
+        internal InlineVarInstruction(MethodBase containingMethod, int offset, OpCode opCode, ushort ordinal) : base(containingMethod, offset, opCode)
         {
             Ordinal = ordinal;
         }

@@ -1,4 +1,5 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
@@ -6,7 +7,7 @@ namespace SexyInject.Emit
     {
         private readonly int delta;
 
-        internal InlineBrTargetInstruction(int offset, OpCode opCode, int delta) : base(offset, opCode)
+        internal InlineBrTargetInstruction(MethodBase containingMethod, int offset, OpCode opCode, int delta) : base(containingMethod, offset, opCode)
         {
             this.delta = delta;
         }

@@ -1,11 +1,12 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class InlineI8Instruction : ILInstruction
     {
-        internal InlineI8Instruction(int offset, OpCode opCode, long value)
-            : base(offset, opCode)
+        internal InlineI8Instruction(MethodBase containingMethod, int offset, OpCode opCode, long value)
+            : base(containingMethod, offset, opCode)
         {
             Int64 = value;
         }

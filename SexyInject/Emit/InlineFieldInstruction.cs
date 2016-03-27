@@ -9,7 +9,7 @@ namespace SexyInject.Emit
         private readonly int token;
         private FieldInfo field;
 
-        internal InlineFieldInstruction(ITokenResolver resolver, int offset, OpCode opCode, int token) : base(offset, opCode)
+        internal InlineFieldInstruction(MethodBase containingMethod, ITokenResolver resolver, int offset, OpCode opCode, int token) : base(containingMethod, offset, opCode)
         {
             this.resolver = resolver;
             this.token = token;

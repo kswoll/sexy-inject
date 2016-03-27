@@ -1,4 +1,5 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
@@ -7,7 +8,7 @@ namespace SexyInject.Emit
         private readonly int[] deltas;
         private int[] targetOffsets;
 
-        internal InlineSwitchInstruction(int offset, OpCode opCode, int[] deltas) : base(offset, opCode)
+        internal InlineSwitchInstruction(MethodBase containingMethod, int offset, OpCode opCode, int[] deltas) : base(containingMethod, offset, opCode)
         {
             this.deltas = deltas;
         }

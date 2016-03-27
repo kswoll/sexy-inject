@@ -1,10 +1,11 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class ShortInlineVarInstruction : ILInstruction
     {
-        internal ShortInlineVarInstruction(int offset, OpCode opCode, byte ordinal) : base(offset, opCode)
+        internal ShortInlineVarInstruction(MethodBase containingMethod, int offset, OpCode opCode, byte ordinal) : base(containingMethod, offset, opCode)
         {
             Ordinal = ordinal;
         }
@@ -14,6 +15,11 @@ namespace SexyInject.Emit
         public override void Accept(ILInstructionVisitor vistor)
         {
             vistor.VisitShortInlineVarInstruction(this);
+        }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()} {Ordinal}";
         }
     }
 }

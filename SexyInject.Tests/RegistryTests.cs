@@ -757,7 +757,9 @@ namespace SexyInject.Tests
         {
             var registry = new Registry();
             registry.RegisterImplicitPattern();
-            registry.Construct(() => new PartialApplicationClass(1, 2, "foo", "bar"));
+            var x = 5;
+            var y = 3;
+            registry.Construct(_ => new PartialApplicationClass(1 + x - y, 2, "foo", "bar"));
         }
     }
 }

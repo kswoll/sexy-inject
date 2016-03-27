@@ -8,7 +8,7 @@ namespace SexyInject.Emit
         private readonly ITokenResolver resolver;
         private MemberInfo member;
 
-        internal InlineTokInstruction(int offset, OpCode opCode, int token, ITokenResolver resolver) : base(offset, opCode)
+        internal InlineTokInstruction(MethodBase containingMethod, int offset, OpCode opCode, int token, ITokenResolver resolver) : base(containingMethod, offset, opCode)
         {
             this.resolver = resolver;
             Token = token;

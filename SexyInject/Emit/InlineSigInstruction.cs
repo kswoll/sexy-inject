@@ -1,4 +1,5 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
@@ -8,7 +9,7 @@ namespace SexyInject.Emit
         private readonly int token;
         private byte[] signature;
 
-        internal InlineSigInstruction(int offset, OpCode opCode, int token, ITokenResolver resolver) : base(offset, opCode)
+        internal InlineSigInstruction(MethodBase containingMethod, int offset, OpCode opCode, int token, ITokenResolver resolver) : base(containingMethod, offset, opCode)
         {
             this.resolver = resolver;
             this.token = token;
@@ -18,5 +19,23 @@ namespace SexyInject.Emit
         public int Token => token;
 
         public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineSigInstruction(this); }
+/*
+
+        public override int GetPopCount()
+        {
+            if (OpCode == OpCodes.Call || OpCode == OpCodes.Callvirt || OpCode == OpCodes.Newobj)
+                return Method.GetParameters().Length + (Method.IsStatic ? 0 : 1);
+            else
+                return base.GetPopCount();
+        }
+
+        public override int GetPushCount()
+        {
+            if (OpCode == OpCodes.Call || OpCode == OpCodes.Callvirt)
+                return (Method as MethodInfo)?.ReturnType != typeof(void) ? 1 : 0;
+            else
+                return base.GetPushCount();
+        }
+*/
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Reflection.Emit;
+﻿using System;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
@@ -7,7 +9,7 @@ namespace SexyInject.Emit
         private readonly ITokenResolver resolver;
         private string @string;
 
-        internal InlineStringInstruction(int offset, OpCode opCode, int token, ITokenResolver resolver) : base(offset, opCode)
+        internal InlineStringInstruction(MethodBase containingMethod, int offset, OpCode opCode, int token, ITokenResolver resolver) : base(containingMethod, offset, opCode)
         {
             this.resolver = resolver;
             Token = token;
@@ -17,5 +19,10 @@ namespace SexyInject.Emit
         public int Token { get; }
 
         public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineStringInstruction(this); }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()} {String}";
+        }
     }
 }

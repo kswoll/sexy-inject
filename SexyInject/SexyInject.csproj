@@ -53,8 +53,12 @@
     <Compile Include="Emit\DefaultFormatterProvider.cs" />
     <Compile Include="Emit\IFormatProvider.cs" />
     <Compile Include="Emit\IILProvider.cs" />
+    <Compile Include="Emit\ILArgumentExpression.cs" />
     <Compile Include="Emit\ILInstruction.cs" />
+    <Compile Include="Emit\ILInstructionPacket.cs" />
     <Compile Include="Emit\ILInstructionVisitor.cs" />
+    <Compile Include="Emit\ILInterpreter.cs" />
+    <Compile Include="Emit\ILNewExpression.cs" />
     <Compile Include="Emit\InlineBrTargetInstruction.cs" />
     <Compile Include="Emit\InlineFieldInstruction.cs" />
     <Compile Include="Emit\InlineI8Instruction.cs" />
@@ -74,6 +78,8 @@
     <Compile Include="Emit\ShortInlineInstruction.cs" />
     <Compile Include="Emit\ShortInlineRInstruction.cs" />
     <Compile Include="Emit\ShortInlineVarInstruction.cs" />
+    <Compile Include="Emit\Signature.cs" />
+    <Compile Include="Emit\SignatureDecompressor.cs" />
     <Compile Include="IGlobalResolverOperator.cs" />
     <Compile Include="InjectAttribute.cs" />
     <Compile Include="IResolverOperator.cs" />

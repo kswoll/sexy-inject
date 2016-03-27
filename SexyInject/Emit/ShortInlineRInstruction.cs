@@ -1,10 +1,11 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class ShortInlineRInstruction : ILInstruction
     {
-        internal ShortInlineRInstruction(int offset, OpCode opCode, float value) : base(offset, opCode)
+        internal ShortInlineRInstruction(MethodBase containingMethod, int offset, OpCode opCode, float value) : base(containingMethod, offset, opCode)
         {
             Single = value;
         }

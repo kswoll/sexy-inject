@@ -1,10 +1,11 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class InlineIInstruction : ILInstruction
     {
-        internal InlineIInstruction(int offset, OpCode opCode, int value) : base(offset, opCode)
+        internal InlineIInstruction(MethodBase containingMethod, int offset, OpCode opCode, int value) : base(containingMethod, offset, opCode)
         {
             Int32 = value;
         }
@@ -14,6 +15,11 @@ namespace SexyInject.Emit
         public override void Accept(ILInstructionVisitor vistor)
         {
             vistor.VisitInlineIInstruction(this);
+        }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()} {Int32}";
         }
     }
 }

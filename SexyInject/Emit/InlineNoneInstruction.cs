@@ -1,16 +1,25 @@
-﻿using System.Reflection.Emit;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
     public class InlineNoneInstruction : ILInstruction
     {
-        internal InlineNoneInstruction(int offset, OpCode opCode) : base(offset, opCode)
+        internal InlineNoneInstruction(MethodBase containingMethod, int offset, OpCode opCode) : base(containingMethod, offset, opCode)
         {
         }
 
         public override void Accept(ILInstructionVisitor vistor)
         {
             vistor.VisitInlineNoneInstruction(this);
+        }
+
+        public override int GetPopCount()
+        {
+            if (OpCode == OpCodes.Ret)
+                return (containingMethod as MethodInfo)?.ReturnType != typeof(void) ? 1 : 0;
+            else
+                return base.GetPopCount();
         }
     }
 }

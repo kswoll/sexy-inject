@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SexyInject.Emit
@@ -9,15 +10,20 @@ namespace SexyInject.Emit
         private readonly int token;
         private Type type;
 
-        internal InlineTypeInstruction(int offset, OpCode opCode, int token, ITokenResolver resolver) : base(offset, opCode)
+        internal InlineTypeInstruction(MethodBase containingMethod, int offset, OpCode opCode, int token, ITokenResolver resolver) : base(containingMethod, offset, opCode)
         {
             this.resolver = resolver;
             this.token = token;
         }
 
         public Type Type => type ?? (type = resolver.AsType(token));
-        public Int32 Token => token;
+        public int Token => token;
 
         public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineTypeInstruction(this); }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()} {Type.FullName}";
+        }
     }
 }
