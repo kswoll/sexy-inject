@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SexyInject.Emit
+namespace SexyInject.Emit.Signatures
 {
     public class SignatureDecompressor
     {
@@ -18,16 +18,17 @@ namespace SexyInject.Emit
                 {
                     var b2 = input[++i];
                     b1 = (byte)UnsetBit(b1, 7);
-                    var twoByteValue = b1 << 8 + b2;
+                    var twoByteValue = (b1 << 8) + b2;
                     if (!IsBitSet(twoByteValue, 14))
                     {
                         result.Add(twoByteValue);
                     }
                     else
                     {
+                        twoByteValue = (int)UnsetBit(twoByteValue, 14);
                         var b3 = input[++i];
                         var b4 = input[++i];
-                        var fourByteValue = twoByteValue << 16 + b3 << 8 + b4;
+                        var fourByteValue = (twoByteValue << 16) + (b3 << 8) + b4;
                         result.Add(fourByteValue);
                     }
                 }

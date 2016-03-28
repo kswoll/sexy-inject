@@ -15,17 +15,15 @@ namespace SexyInject.Emit
 
     public class ModuleScopeTokenResolver : ITokenResolver
     {
-        private MethodBase m_enclosingMethod;
         private readonly Type[] methodContext;
         private readonly Module module;
         private readonly Type[] typeContext;
 
         public ModuleScopeTokenResolver(MethodBase method)
         {
-            m_enclosingMethod = method;
             module = method.Module;
             methodContext = method is ConstructorInfo ? null : method.GetGenericArguments();
-            typeContext = method.DeclaringType == null ? null : method.DeclaringType.GetGenericArguments();
+            typeContext = method.DeclaringType?.GetGenericArguments();
         }
 
         public MethodBase AsMethod(int token)
