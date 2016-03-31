@@ -54,6 +54,7 @@
     <Compile Include="Emit\SignatureDecompressorTests.cs" />
     <Compile Include="Emit\SignatureReaderTests.cs" />
     <Compile Include="Emit\TestClasses\FieldClass.cs" />
+    <Compile Include="Emit\TestClasses\MethodClass.cs" />
     <Compile Include="Emit\TestClasses\PropertyClass.cs" />
     <Compile Include="GlobalOperatorTests.cs" />
     <Compile Include="MetaData\IMetaDataDispenser.cs" />

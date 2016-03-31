@@ -78,11 +78,13 @@
     <Compile Include="Emit\ShortInlineInstruction.cs" />
     <Compile Include="Emit\ShortInlineRInstruction.cs" />
     <Compile Include="Emit\ShortInlineVarInstruction.cs" />
+    <Compile Include="Emit\Signatures\GenericMethodParameter.cs" />
     <Compile Include="Emit\Signatures\Signature.cs" />
     <Compile Include="Emit\Signatures\SignatureArrayShape.cs" />
     <Compile Include="Emit\Signatures\SignatureArrayType.cs" />
     <Compile Include="Emit\Signatures\SignatureCustomModifier.cs" />
     <Compile Include="Emit\Signatures\SignatureDecompressor.cs" />
+    <Compile Include="Emit\Signatures\SignatureMethod.cs" />
     <Compile Include="Emit\Signatures\SignatureProperty.cs" />
     <Compile Include="Emit\Signatures\SignatureTypeKind.cs" />
     <Compile Include="Emit\Signatures\SignatureField.cs" />
@@ -98,6 +100,7 @@
     <Compile Include="LambdaGlobalResolverOperator.cs" />
     <Compile Include="ResolverProcessor.cs" />
     <Compile Include="Emit\ILReader.cs" />
+    <Compile Include="Utils\EnumExtensions.cs" />
     <Compile Include="WhenResolvedResolver.cs" />
     <Compile Include="IResolver.cs" />
     <Compile Include="LambdaResolver.cs" />

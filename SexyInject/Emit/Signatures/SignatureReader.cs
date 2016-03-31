@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SexyInject.Utils;
 
 namespace SexyInject.Emit.Signatures
 {
@@ -63,6 +64,14 @@ namespace SexyInject.Emit.Signatures
         public SignatureType ReadType()
         {
             var elementType = ReadElementType();
+            switch (elementType)
+            {
+                case SignatureTypeKind.MVar:
+                {
+                    var number = ReadUnsignedInt();
+                    return new GenericMethodParameter(elementType, number);
+                }
+            }
             return new SignatureType(elementType);
         }
 
@@ -96,6 +105,18 @@ namespace SexyInject.Emit.Signatures
             return new SignatureProperty(modifiers, flag.HasFlag(SignatureFlags.HasThis), type, parameters);
         }
 
+        public SignatureMethod ReadMethodDef()
+        {
+            var flags = ReadFlags();
+            int genericParameterCount = 0;
+            if (flags.HasFlag(SignatureFlags.Generic))
+                genericParameterCount = ReadUnsignedInt();
+            var parameterCount = ReadUnsignedInt();
+            var returnType = ReadReturnType();
+            var parameters = ReadParams(parameterCount);
+            return new SignatureMethod(flags, parameters, returnType, genericParameterCount);
+        }
+
         public SignatureCustomModifier ReadCustomModifier()
         {
             var elementType = ReadElementType();
@@ -122,14 +143,27 @@ namespace SexyInject.Emit.Signatures
         {
             var customModifiers = ReadCustomModifiers();
             var elementType = ReadElementType();
-            var type = elementType == SignatureTypeKind.ByRef ? ReadType() : null;
+            SignatureType type = null;
+            if (elementType != SignatureTypeKind.TypedByRef)
+            {
+                if (elementType != SignatureTypeKind.ByRef)
+                    Back();
+                type = ReadType();
+            }
             return new SignatureParam(customModifiers, type == null, type);
+        }
+
+        public SignatureParam ReadReturnType()
+        {
+            return ReadParam();
         }
 
         public IEnumerable<SignatureParam> ReadParams(int count)
         {
+            var result = new List<SignatureParam>();
             for (var i = 0; i < count; i++)
-                yield return ReadParam();
+                result.Add(ReadParam());
+            return result;
         }
 
         private static bool IsBitSet(long b, int position)

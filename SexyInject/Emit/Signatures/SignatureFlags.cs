@@ -2,6 +2,7 @@
 {
     public enum SignatureFlags : byte
     {
+        Default = 0x0,
         HasThis = 0x20,
         ExplicitThis = 0x40,
         Vararg = 0x5,
@@ -14,6 +15,7 @@
         LocalSig = 0x7,
         Property = 0x8,
         ByRef = 0x10,
+        Generic = 0x10,
         TypedByRef = 0x16
     }
 }
