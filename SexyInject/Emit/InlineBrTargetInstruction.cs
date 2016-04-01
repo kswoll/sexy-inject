@@ -15,9 +15,7 @@ namespace SexyInject.Emit
         public int Delta => delta;
         public int TargetOffset => offset + delta + 1 + 4;
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineBrTargetInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineBrTargetInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Delta);
     }
 }

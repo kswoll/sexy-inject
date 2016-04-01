@@ -18,15 +18,17 @@ namespace SexyInject.Emit
         public MethodBase Method => method ?? (method = resolver.AsMethod(token));
         public int Token => token;
 
-        public override void Accept(ILInstructionVisitor vistor)
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineMethodInstruction(this);
+
+        public override void Emit(ILGenerator il)
         {
-            vistor.VisitInlineMethodInstruction(this);
+            if (Method is MethodInfo)
+                il.Emit(OpCode, (MethodInfo)Method);
+            else
+                il.Emit(OpCode, (ConstructorInfo)Method);
         }
 
-        public override string ToString()
-        {
-            return $"{base.ToString()} {Method.DeclaringType.FullName}.{Method}";
-        }
+        public override string ToString() => $"{base.ToString()} {Method.DeclaringType.FullName}.{Method}";
 
         public override int GetPopCount()
         {

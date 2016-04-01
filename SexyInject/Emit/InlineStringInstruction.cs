@@ -18,7 +18,8 @@ namespace SexyInject.Emit
         public string String => @string ?? (@string = resolver.AsString(Token));
         public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineStringInstruction(this); }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineStringInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, String);
 
         public override string ToString()
         {

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SexyInject.Emit
@@ -18,7 +19,13 @@ namespace SexyInject.Emit
         public byte[] Signature => signature ?? (signature = resolver.AsSignature(token));
         public int Token => token;
 
-        public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineSigInstruction(this); }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineSigInstruction(this);
+
+        public override void Emit(ILGenerator il)
+        {
+            throw new Exception("Unsupported op code");
+        }
+
 /*
 
         public override int GetPopCount()

@@ -13,9 +13,7 @@ namespace SexyInject.Emit
 
         public long Int64 { get; }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineI8Instruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineI8Instruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Int64);
     }
 }

@@ -18,9 +18,7 @@ namespace SexyInject.Emit
         public FieldInfo Field => field ?? (field = resolver.AsField(token));
         public int Token => token;
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineFieldInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineFieldInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Field);
     }
 }

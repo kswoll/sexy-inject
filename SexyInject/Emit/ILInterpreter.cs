@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace SexyInject.Emit
 {
@@ -7,9 +8,10 @@ namespace SexyInject.Emit
         public IEnumerable<ILInstructionPacket> Interpret(IEnumerable<ILInstruction> instructions)
         {
             var stack = new Stack<ILInstructionPacket>();
-            return null;
             foreach (var instruction in instructions)
             {
+                var pop = Enumerable.Range(0, instruction.GetPopCount()).Select(x => stack.Pop()).ToArray();
+                
             }
         }
     }

@@ -9,10 +9,8 @@ namespace SexyInject.Emit
         {
         }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineNoneInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineNoneInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode);
 
         public override int GetPopCount()
         {

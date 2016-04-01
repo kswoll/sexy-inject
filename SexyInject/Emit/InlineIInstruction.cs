@@ -12,14 +12,8 @@ namespace SexyInject.Emit
 
         public int Int32 { get; }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineIInstruction(this);
-        }
-
-        public override string ToString()
-        {
-            return $"{base.ToString()} {Int32}";
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineIInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Int32);
+        public override string ToString() => $"{base.ToString()} {Int32}";
     }
 }

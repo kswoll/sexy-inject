@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace SexyInject.Emit
 {
@@ -15,16 +17,10 @@ namespace SexyInject.Emit
             Arguments = arguments.ToList();
         }
 
-        public static ILNewExpression Decompile(ILInstruction[] instructions)
+        public static DynamicMethod InjectConstructorCall(MethodInfo method, ILInstruction[] instructions)
         {
-            var arguments = new List<ILArgumentExpression>();
-            for (var i = 0; i < instructions.Length; i++)
-            {
-                var instruction = instructions[i];
-            }
             InlineMethodInstruction constructorInstruction = null;
-//            int i = instructions.Length - 1;
-/*
+            int i = instructions.Length - 1;
             for (; i >= 0 && constructorInstruction == null; i--)
             {
                 constructorInstruction = instructions[i] as InlineMethodInstruction;
@@ -33,8 +29,13 @@ namespace SexyInject.Emit
             {
                 throw new ArgumentException("No invocation to a constructor", nameof(instructions));
             }
-*/
-            return new ILNewExpression(constructorInstruction, Enumerable.Empty<ILArgumentExpression>());
+            var injectedMethod = new DynamicMethod(method.Name, method.ReturnType, method.GetParameters().Select(x => x.ParameterType).ToArray(), method.DeclaringType);
+            var il = injectedMethod.GetILGenerator();
+            for (int j = 0; j < i; j++)
+            {
+                var instruction = instructions[j];
+                il.Emit();
+            }
         }
     }
 }

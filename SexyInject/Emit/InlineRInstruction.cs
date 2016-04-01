@@ -12,9 +12,7 @@ namespace SexyInject.Emit
 
         public double Double { get; }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineRInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineRInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Double);
     }
 }

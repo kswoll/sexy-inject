@@ -242,7 +242,7 @@ namespace SexyInject.Emit
             return BitConverter.ToSingle(byteArray, pos);
         }
 
-        double ReadDouble()
+        public double ReadDouble()
         {
             var pos = position;
             position += 8;

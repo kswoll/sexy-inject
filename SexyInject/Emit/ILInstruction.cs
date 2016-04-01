@@ -21,6 +21,7 @@ namespace SexyInject.Emit
         public OpCode OpCode => opCode;
 
         public abstract void Accept(ILInstructionVisitor vistor);
+        public abstract void Emit(ILGenerator generator);
 
         public override string ToString()
         {

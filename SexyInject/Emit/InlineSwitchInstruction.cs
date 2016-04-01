@@ -31,9 +31,7 @@ namespace SexyInject.Emit
             }
         }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitInlineSwitchInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineSwitchInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Deltas);
     }
 }
