@@ -126,7 +126,7 @@ namespace SexyInject
         public T Construct<T>(Func<ResolveContext, T> constructor)
         {
             var context = CreateResolverContext(Enumerable.Empty<object>());
-            var factory = ILFactoryGenerator.Interpret(constructor);
+            var factory = DefaultArgumentsInjector.GetInjector(constructor);
             return factory(context);
         }
 

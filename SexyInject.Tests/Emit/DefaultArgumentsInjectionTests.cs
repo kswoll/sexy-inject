@@ -6,7 +6,7 @@ using SexyInject.Emit;
 namespace SexyInject.Tests.Emit
 {
     [TestFixture]
-    public class ILNewExpressionTests
+    public class DefaultArgumentsInjectionTests
     {
         [Test]
         public void NoArgumentConstructor()
@@ -224,6 +224,24 @@ namespace SexyInject.Tests.Emit
             Assert.AreEqual(42, instance.Value);
         }
 
+        [Test]
+        public void BoolDefaultTrue()
+        {
+            var registry = new Registry();
+            registry.Bind<bool>(x => x.To(_ => false));
+            var instance = registry.Construct(_ => new ClassWithBoolDefaultTrue());
+            Assert.IsFalse(instance.Value);
+        }
+
+        [Test]
+        public void BoolDefaultFalse()
+        {
+            var registry = new Registry();
+            registry.Bind<bool>(x => x.To(_ => true));
+            var instance = registry.Construct(_ => new ClassWithBoolDefaultFalse());
+            Assert.IsTrue(instance.Value);
+        }
+
         class NoArgumentConstructorClass
         {
         }
@@ -423,6 +441,26 @@ namespace SexyInject.Tests.Emit
             public int Value { get; }
 
             public ClassOneArgumentConstructorWithDefault1000(int value = 1000)
+            {
+                Value = value;
+            }
+        }
+
+        class ClassWithBoolDefaultTrue
+        {
+            public bool Value { get; }
+
+            public ClassWithBoolDefaultTrue(bool value = true)
+            {
+                Value = value;
+            }
+        }
+
+        class ClassWithBoolDefaultFalse
+        {
+            public bool Value { get; }
+
+            public ClassWithBoolDefaultFalse(bool value = false)
             {
                 Value = value;
             }

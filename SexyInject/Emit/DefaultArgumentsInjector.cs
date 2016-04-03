@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,9 +8,11 @@ using System.Runtime.CompilerServices;
 
 namespace SexyInject.Emit
 {
-    public static class ILFactoryGenerator
+    public static class DefaultArgumentsInjector
     {
-        public static Func<ResolveContext, T> Interpret<T>(Func<ResolveContext, T> factoryFunction)
+        private static ConcurrentDictionary<MethodInfo, Delegate> cache = new ConcurrentDictionary<MethodInfo, Delegate>();
+
+        public static Func<ResolveContext, T> GetInjector<T>(Func<ResolveContext, T> factoryFunction)
         {
             var method = factoryFunction.GetMethodInfo();
             if (Attribute.IsDefined(method, typeof(AsyncStateMachineAttribute)))
@@ -23,6 +26,9 @@ namespace SexyInject.Emit
             var stack = new Stack<ILInstructionPacket>();
             foreach (var instruction in instructions)
             {
+                if (instruction.OpCode == OpCodes.Switch || instruction.OpCode == OpCodes.Calli)
+                    throw new InvalidFactoryException($"Unsupported op code in factory function: {instruction.OpCode}");
+
                 var popCount = instruction.GetPopCount();
                 if (instruction.OpCode == OpCodes.Dup)
                     popCount = 0;
@@ -160,7 +166,10 @@ namespace SexyInject.Emit
             }
             else if (defaultValue is bool)
             {
-                return false;
+                if (defaultValue.Equals(false))
+                    return instruction.OpCode == OpCodes.Ldc_I4_0;
+                else 
+                    return instruction.OpCode == OpCodes.Ldc_I4_1;
             }
             else if (type.IsValueType)
             {
