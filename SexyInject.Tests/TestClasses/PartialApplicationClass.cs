@@ -7,6 +7,7 @@
         public string String1 { get; }
         public string String2 { get; }
         public SimpleClass SimpleClass { get; }
+        public SomeStruct SomeStruct { get; }
 
         public PartialApplicationClass(int int1, int int2, string string1, string string2, SimpleClass simpleClass = null, SomeStruct someStruct = default(SomeStruct))
         {
@@ -15,6 +16,7 @@
             String1 = string1;
             String2 = string2;
             SimpleClass = simpleClass;
+            SomeStruct = someStruct;
         }
     }
 }
