@@ -58,7 +58,7 @@
     <Compile Include="Emit\ILInstruction.cs" />
     <Compile Include="Emit\ILInstructionPacket.cs" />
     <Compile Include="Emit\ILInstructionVisitor.cs" />
-    <Compile Include="Emit\DefaultArgumentsInjector.cs" />
+    <Compile Include="Emit\PartialApplicationFactory.cs" />
     <Compile Include="Emit\InlineBrTargetInstruction.cs" />
     <Compile Include="Emit\InlineFieldInstruction.cs" />
     <Compile Include="Emit\InlineI8Instruction.cs" />

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using SexyInject.Emit;
 
 namespace SexyInject.Tests.Emit
 {
     [TestFixture]
-    public class DefaultArgumentsInjectionTests
+    public class PartialApplicationTests
     {
         [Test]
         public void NoArgumentConstructor()

@@ -8,105 +8,109 @@ using System.Runtime.CompilerServices;
 
 namespace SexyInject.Emit
 {
-    public static class DefaultArgumentsInjector
+    public static class PartialApplicationFactory
     {
-        private static ConcurrentDictionary<MethodInfo, Delegate> cache = new ConcurrentDictionary<MethodInfo, Delegate>();
+        private static readonly ConcurrentDictionary<MethodInfo, DynamicMethod> cache = new ConcurrentDictionary<MethodInfo, DynamicMethod>();
 
-        public static Func<ResolveContext, T> GetInjector<T>(Func<ResolveContext, T> factoryFunction)
+        public static Func<ResolveContext, T> CreateFactory<T>(Func<ResolveContext, T> factoryFunction)
         {
             var method = factoryFunction.GetMethodInfo();
-            if (Attribute.IsDefined(method, typeof(AsyncStateMachineAttribute)))
-                throw new InvalidFactoryException("Factory functions cannot use async/await");
-
-            var ilReader = new ILReader(method);
-            var instructions = ilReader.ToArray();
-
-            var instructionsByLocalVariable = new Dictionary<int, List<ILInstructionPacket>>();
-
-            var stack = new Stack<ILInstructionPacket>();
-            foreach (var instruction in instructions)
+            var dynamicMethod = cache.GetOrAdd(method, _ =>
             {
-                if (instruction.OpCode == OpCodes.Switch || instruction.OpCode == OpCodes.Calli)
-                    throw new InvalidFactoryException($"Unsupported op code in factory function: {instruction.OpCode}");
+                if (Attribute.IsDefined(method, typeof(AsyncStateMachineAttribute)))
+                    throw new InvalidFactoryException("Factory functions cannot use async/await");
 
-                var popCount = instruction.GetPopCount();
-                if (instruction.OpCode == OpCodes.Dup)
-                    popCount = 0;
-                var popped = Enumerable.Range(0, popCount).Select(x => stack.Pop()).Reverse().ToArray();
-                var packet = new ILInstructionPacket(instruction, popped);
-                stack.Push(packet);
-            }
+                var ilReader = new ILReader(method);
+                var instructions = ilReader.ToArray();
 
-            foreach (var packet in stack.SelectMany(x => x.UnwrapPackets()))
-            {
-                int localIndex;
-                if (packet.Instruction.TryGetLocal(out localIndex))
+                var instructionsByLocalVariable = new Dictionary<int, List<ILInstructionPacket>>();
+
+                var stack = new Stack<ILInstructionPacket>();
+                foreach (var instruction in instructions)
                 {
-                    List<ILInstructionPacket> localInstructions;
-                    if (!instructionsByLocalVariable.TryGetValue(localIndex, out localInstructions))
-                    {
-                        localInstructions = new List<ILInstructionPacket>();
-                        instructionsByLocalVariable[localIndex] = localInstructions;
-                    }
-                    localInstructions.Add(packet);
+                    if (instruction.OpCode == OpCodes.Switch || instruction.OpCode == OpCodes.Calli)
+                        throw new InvalidFactoryException($"Unsupported op code in factory function: {instruction.OpCode}");
+
+                    var popCount = instruction.GetPopCount();
+                    if (instruction.OpCode == OpCodes.Dup)
+                        popCount = 0;
+                    var popped = Enumerable.Range(0, popCount).Select(x => stack.Pop()).Reverse().ToArray();
+                    var packet = new ILInstructionPacket(instruction, popped);
+                    stack.Push(packet);
                 }
+
+                foreach (var packet in stack.SelectMany(x => x.UnwrapPackets()))
+                {
+                    int localIndex;
+                    if (packet.Instruction.TryGetLocal(out localIndex))
+                    {
+                        List<ILInstructionPacket> localInstructions;
+                        if (!instructionsByLocalVariable.TryGetValue(localIndex, out localInstructions))
+                        {
+                            localInstructions = new List<ILInstructionPacket>();
+                            instructionsByLocalVariable[localIndex] = localInstructions;
+                        }
+                        localInstructions.Add(packet);
+                    }
                 
-            }
-
-            var returnInstruction = stack.Pop();
-            if (returnInstruction.Instruction.OpCode != OpCodes.Ret)
-                throw new InvalidFactoryException("The last operation in a factory must return the instance.");
-
-            var constructorInvocation = returnInstruction.ChildInstructions.Single();
-            if (constructorInvocation.Instruction.OpCode != OpCodes.Newobj)
-                throw new InvalidFactoryException("The factory should be a simple expression that instantiates the desired type.");
-
-            var injectedMethod = new DynamicMethod(method.Name, method.ReturnType, new[] { factoryFunction.Target.GetType() }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray(), factoryFunction.Target.GetType());
-            var il = injectedMethod.GetILGenerator();
-            foreach (var local in method.GetMethodBody().LocalVariables)
-            {
-                il.DeclareLocal(local.LocalType, local.IsPinned);
-            }
-
-            foreach (var prelude in stack.Reverse())
-            {
-                foreach (var instruction in prelude.UnwrapInstructions())
-                {
-                    instruction.Emit(il);
                 }
-            }
 
-            var constructorInstruction = (InlineMethodInstruction)constructorInvocation.Instruction;
-            var constructor = (ConstructorInfo)constructorInstruction.Method;
-            var arguments = constructorInvocation.ChildInstructions.ToArray();
-            var parameters = constructor.GetParameters();
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                var argument = arguments[i];
-                var parameter = parameters[i];
-                if (parameter.IsOptional && IsDefaultValue(argument, parameter.ParameterType, parameter.DefaultValue, instructionsByLocalVariable))
+                var returnInstruction = stack.Pop();
+                if (returnInstruction.Instruction.OpCode != OpCodes.Ret)
+                    throw new InvalidFactoryException("The last operation in a factory must return the instance.");
+
+                var constructorInvocation = returnInstruction.ChildInstructions.Single();
+                if (constructorInvocation.Instruction.OpCode != OpCodes.Newobj)
+                    throw new InvalidFactoryException("The factory should be a simple expression that instantiates the desired type.");
+
+                var injectedMethod = new DynamicMethod(method.Name, method.ReturnType, new[] { factoryFunction.Target.GetType() }.Concat(method.GetParameters().Select(x => x.ParameterType)).ToArray(), factoryFunction.Target.GetType());
+                var il = injectedMethod.GetILGenerator();
+                foreach (var local in method.GetMethodBody().LocalVariables)
                 {
-                    // Use the context to resolve the argument
-                    il.Emit(OpCodes.Ldarg_1);
-                    il.LoadType(parameter.ParameterType);
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    il.Emit(OpCodes.Newarr, typeof(object));
-                    il.EmitCall(OpCodes.Call, ResolveContext.ResolveMethod, null);
-                    if (parameter.ParameterType.IsValueType || parameter.ParameterType.IsGenericParameter)
+                    il.DeclareLocal(local.LocalType, local.IsPinned);
+                }
+
+                foreach (var prelude in stack.Reverse())
+                {
+                    foreach (var instruction in prelude.UnwrapInstructions())
                     {
-                        il.Emit(OpCodes.Unbox_Any, parameter.ParameterType);
+                        instruction.Emit(il);
                     }
                 }
-                else
-                {
-                    foreach (var instruction in argument.UnwrapInstructions())
-                        instruction.Emit(il);                    
-                }
-            }
-            constructorInstruction.Emit(il);
-            returnInstruction.Instruction.Emit(il);
 
-            return (Func<ResolveContext, T>)injectedMethod.CreateDelegate(typeof(Func<ResolveContext, T>), factoryFunction.Target);
+                var constructorInstruction = (InlineMethodInstruction)constructorInvocation.Instruction;
+                var constructor = (ConstructorInfo)constructorInstruction.Method;
+                var arguments = constructorInvocation.ChildInstructions.ToArray();
+                var parameters = constructor.GetParameters();
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var argument = arguments[i];
+                    var parameter = parameters[i];
+                    if (parameter.IsOptional && IsDefaultValue(argument, parameter.ParameterType, parameter.DefaultValue, instructionsByLocalVariable))
+                    {
+                        // Use the context to resolve the argument
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.LoadType(parameter.ParameterType);
+                        il.Emit(OpCodes.Ldc_I4_0);
+                        il.Emit(OpCodes.Newarr, typeof(object));
+                        il.EmitCall(OpCodes.Call, ResolveContext.ResolveMethod, null);
+                        if (parameter.ParameterType.IsValueType || parameter.ParameterType.IsGenericParameter)
+                        {
+                            il.Emit(OpCodes.Unbox_Any, parameter.ParameterType);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var instruction in argument.UnwrapInstructions())
+                            instruction.Emit(il);                    
+                    }
+                }
+                constructorInstruction.Emit(il);
+                returnInstruction.Instruction.Emit(il);
+
+                return injectedMethod;
+            });
+            return (Func<ResolveContext, T>)dynamicMethod.CreateDelegate(typeof(Func<ResolveContext, T>), factoryFunction.Target);
         }
 
         private static bool IsDefaultValue(ILInstructionPacket packet, Type type, object defaultValue, Dictionary<int, List<ILInstructionPacket>> locals)

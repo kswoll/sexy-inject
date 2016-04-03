@@ -50,7 +50,7 @@
   <ItemGroup>
     <Compile Include="BinderTests.cs" />
     <Compile Include="ConstrainingBindingsTests.cs" />
-    <Compile Include="Emit\DefaultArgumentsInjectionTests.cs" />
+    <Compile Include="Emit\PartialApplicationTests.cs" />
     <Compile Include="Emit\TestClasses\FieldClass.cs" />
     <Compile Include="Emit\TestClasses\MethodClass.cs" />
     <Compile Include="Emit\TestClasses\PropertyClass.cs" />
