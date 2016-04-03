@@ -12,6 +12,7 @@ namespace SexyInject.Emit
 
         public float Single { get; }
 
-        public override void Accept(ILInstructionVisitor vistor) { vistor.VisitShortInlineRInstruction(this); }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitShortInlineRInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Single);
     }
 }

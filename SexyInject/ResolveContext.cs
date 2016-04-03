@@ -19,6 +19,8 @@ namespace SexyInject
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethods().Single(x => x.Name == nameof(Resolve) && x.GetParameters().Length == 2);
 
+        internal static MethodInfo ResolveMethod => resolveMethod;
+
         public ResolveContext(Registry registry, Func<Type, object> resolver, Constructor constructor, IEnumerable<object> arguments)
         {
             Registry = registry;
@@ -229,6 +231,8 @@ namespace SexyInject
             yield return type;
             if (type.IsGenericType)
                 yield return type.GetGenericTypeDefinition();
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                yield return type.GetGenericArguments()[0];
 
             foreach (var @interface in type.GetInterfaces())
             {

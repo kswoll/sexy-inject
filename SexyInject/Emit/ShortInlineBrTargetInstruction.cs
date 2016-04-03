@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SexyInject.Emit
@@ -15,9 +16,11 @@ namespace SexyInject.Emit
         public sbyte Delta => delta;
         public int TargetOffset => offset + delta + 1 + 1;
 
-        public override void Accept(ILInstructionVisitor vistor)
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitShortInlineBrTargetInstruction(this);
+
+        public override void Emit(ILGenerator il)
         {
-            vistor.VisitShortInlineBrTargetInstruction(this);
+            throw new NotImplementedException();
         }
     }
 }

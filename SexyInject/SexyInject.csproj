@@ -51,14 +51,14 @@
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
     <Compile Include="Emit\DefaultFormatterProvider.cs" />
+    <Compile Include="Emit\EmitExtensions.cs" />
     <Compile Include="Emit\IFormatProvider.cs" />
     <Compile Include="Emit\IILProvider.cs" />
     <Compile Include="Emit\ILArgumentExpression.cs" />
     <Compile Include="Emit\ILInstruction.cs" />
     <Compile Include="Emit\ILInstructionPacket.cs" />
     <Compile Include="Emit\ILInstructionVisitor.cs" />
-    <Compile Include="Emit\ILInterpreter.cs" />
-    <Compile Include="Emit\ILNewExpression.cs" />
+    <Compile Include="Emit\ILFactoryGenerator.cs" />
     <Compile Include="Emit\InlineBrTargetInstruction.cs" />
     <Compile Include="Emit\InlineFieldInstruction.cs" />
     <Compile Include="Emit\InlineI8Instruction.cs" />
@@ -72,6 +72,7 @@
     <Compile Include="Emit\InlineTokInstruction.cs" />
     <Compile Include="Emit\InlineTypeInstruction.cs" />
     <Compile Include="Emit\InlineVarInstruction.cs" />
+    <Compile Include="Emit\InvalidFactoryException.cs" />
     <Compile Include="Emit\ITokenResolver.cs" />
     <Compile Include="Emit\MethodBaseILProvider.cs" />
     <Compile Include="Emit\ShortInlineBrTargetInstruction.cs" />

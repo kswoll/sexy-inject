@@ -125,11 +125,9 @@ namespace SexyInject
 
         public T Construct<T>(Func<ResolveContext, T> constructor)
         {
-            var ilReader = new ILReader(constructor.GetMethodInfo());
-            var instructions = ilReader.ToArray();
-
-
-            return default(T);
+            var context = CreateResolverContext(Enumerable.Empty<object>());
+            var factory = ILFactoryGenerator.Interpret(constructor);
+            return factory(context);
         }
 
         public void AddGlobalHeadOperator(Func<ResolverContext, ResolverContext> @operator, Func<ResolverContext, bool> predicate = null)

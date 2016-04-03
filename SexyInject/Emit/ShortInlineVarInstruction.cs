@@ -12,10 +12,8 @@ namespace SexyInject.Emit
 
         public byte Ordinal { get; }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitShortInlineVarInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitShortInlineVarInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Ordinal);
 
         public override string ToString()
         {

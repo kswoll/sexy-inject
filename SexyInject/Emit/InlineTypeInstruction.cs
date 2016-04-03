@@ -19,7 +19,8 @@ namespace SexyInject.Emit
         public Type Type => type ?? (type = resolver.AsType(token));
         public int Token => token;
 
-        public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineTypeInstruction(this); }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineTypeInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Type);
 
         public override string ToString()
         {

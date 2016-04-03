@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SexyInject.Emit
@@ -32,6 +33,10 @@ namespace SexyInject.Emit
         }
 
         public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineSwitchInstruction(this);
-        public override void Emit(ILGenerator il) => il.Emit(OpCode, Deltas);
+
+        public override void Emit(ILGenerator il)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

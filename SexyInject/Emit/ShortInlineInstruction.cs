@@ -12,9 +12,7 @@ namespace SexyInject.Emit
 
         public byte Byte { get; }
 
-        public override void Accept(ILInstructionVisitor vistor)
-        {
-            vistor.VisitShortInlineIInstruction(this);
-        }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitShortInlineIInstruction(this);
+        public override void Emit(ILGenerator il) => il.Emit(OpCode, Byte);
     }
 }

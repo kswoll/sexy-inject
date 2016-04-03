@@ -33,7 +33,7 @@ namespace SexyInject.Emit
         public override int GetPopCount()
         {
             if (OpCode == OpCodes.Call || OpCode == OpCodes.Callvirt || OpCode == OpCodes.Newobj)
-                return Method.GetParameters().Length + (Method.IsStatic ? 0 : 1);
+                return Method.GetParameters().Length + (Method.IsStatic || Method.IsConstructor ? 0 : 1);
             else
                 return base.GetPopCount();
         }

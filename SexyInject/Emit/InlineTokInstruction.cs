@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace SexyInject.Emit
@@ -17,6 +18,17 @@ namespace SexyInject.Emit
         public MemberInfo Member => member ?? (member = resolver.AsMember(Token));
         public int Token { get; }
 
-        public override void Accept(ILInstructionVisitor vistor) { vistor.VisitInlineTokInstruction(this); }
+        public override void Accept(ILInstructionVisitor vistor) => vistor.VisitInlineTokInstruction(this);
+
+        public override void Emit(ILGenerator il)
+        {
+            var member = Member;
+            if (member is Type)
+                il.Emit(OpCode, (Type)member);
+            else if (member is FieldInfo)
+                il.Emit(OpCode, (FieldInfo)member);
+            else
+                il.Emit(OpCode, (MethodInfo)member);
+        }
     }
 }
