@@ -1,4 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework;
+using SexyInject.Emit;
 
 namespace SexyInject.Tests.Emit
 {
@@ -201,6 +204,24 @@ namespace SexyInject.Tests.Emit
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1000());
             Assert.AreEqual(100, instance.Value);            
+        }
+
+        [Test]
+        public void AsyncConstructorsThrows()
+        {
+            var registry = new Registry();
+#pragma warning disable 1998
+            Assert.Throws<InvalidFactoryException>(() => registry.Construct(async _ => new ClassOneArgumentConstructorWithDefault1()));
+#pragma warning restore 1998
+        }
+
+        [Test]
+        public void CallLambda()
+        {
+            Func<int> getValue = () => 42;
+            var registry = new Registry();
+            var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1(getValue()));
+            Assert.AreEqual(42, instance.Value);
         }
 
         class NoArgumentConstructorClass

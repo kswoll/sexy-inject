@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace SexyInject.Emit
 {
@@ -11,6 +12,9 @@ namespace SexyInject.Emit
         public static Func<ResolveContext, T> Interpret<T>(Func<ResolveContext, T> factoryFunction)
         {
             var method = factoryFunction.GetMethodInfo();
+            if (Attribute.IsDefined(method, typeof(AsyncStateMachineAttribute)))
+                throw new InvalidFactoryException("Factory functions cannot use async/await");
+
             var ilReader = new ILReader(method);
             var instructions = ilReader.ToArray();
 
