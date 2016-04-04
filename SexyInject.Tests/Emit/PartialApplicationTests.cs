@@ -257,6 +257,22 @@ namespace SexyInject.Tests.Emit
             Assert.AreEqual(new DateTime(2016, 2, 3), instance.LargerTestStruct.Date);
         }
 
+        [Test]
+        public void MoreComplexInitializerWithStruct()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.RegisterPartialApplicationPattern();
+            registry.Bind<int>(x => x.To(-1));
+            registry.Bind<string>(x => x.To("foo"));
+            registry.Bind<bool>(x => x.To(true));
+            registry.Bind<DateTime>(x => x.To(new DateTime(2015, 1, 1)));
+            var instance = registry.Construct(_ => new ClassThatDependsOnLargerStruct(largerTestStruct: new LargerTestStruct { Value = 10, String = "bar", Date = new DateTime(2016, 2, 3) }));
+            Assert.AreEqual(10, instance.LargerTestStruct.Value);
+            Assert.AreEqual("bar", instance.LargerTestStruct.String);
+            Assert.AreEqual(new DateTime(2016, 2, 3), instance.LargerTestStruct.Date);
+        }
+
         class NoArgumentConstructorClass
         {
         }
