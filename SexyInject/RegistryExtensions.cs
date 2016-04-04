@@ -17,6 +17,36 @@ namespace SexyInject
                 .Cache((context, targetType) => targetType));
         }
 
+        public static void RegisterPartialApplicationPattern(this Registry registry)
+        {
+            registry.Bind(typeof(Func<,>), x => x
+                .To((context, type) =>
+                {
+                    var constructorType = type.GetGenericArguments()[0];
+                    var returnType = type.GetGenericArguments()[1];
+                    var constructor = Expression.Parameter(constructorType, "constructor");
+                    var lambda = Expression.Lambda(type, registry.PartialApplicationExpression(returnType, constructor), constructor);
+                    return lambda.Compile();
+                })
+                .When(type =>
+                {
+                    var constructorType = type.GetGenericArguments()[0];
+                    var returnType = type.GetGenericArguments()[1];
+                    return constructorType.IsGenericType && constructorType.GetGenericTypeDefinition() == typeof(Func<,>) && constructorType.GetGenericArguments()[0] == typeof(ResolveContext) && constructorType.GetGenericArguments()[1] == returnType;
+                })
+                .Cache(Cache.Singleton));
+            registry.Bind(typeof(PartialConstructor<>), x => x
+                .To((context, type) =>
+                {
+                    var returnType = type.GetGenericArguments()[0];
+                    var constructorType = typeof(Func<,>).MakeGenericType(typeof(ResolveContext), returnType);
+                    var constructor = Expression.Parameter(constructorType, "constructor");
+                    var lambda = Expression.Lambda(type, registry.PartialApplicationExpression(returnType, constructor), constructor);
+                    return lambda.Compile();
+                })
+                .Cache(Cache.Singleton));
+        }
+
         /// <summary>
         /// Binds all <see cref="Func{T}" /> to a factory implementation that will create an instance of T for you upon invocation.
         /// </summary>
@@ -54,14 +84,6 @@ namespace SexyInject
         public static void RegisterTransientCachingPattern(this Registry registry)
         {
             registry.AddGlobalTailOperator(x => x.Cache(Cache.Transient));
-        }
-
-        public static void RegisterPartialApplicationPattern(this Registry registry)
-        {
-            registry.Bind(typeof(Func<>), x => x
-                .To((context, type) => constructor => context.Construct(type, constructor))
-                .When(type => type.GetGenericArguments().Single().IsGenericType && type.GetGenericArguments().Single().GetGenericTypeDefinition() == typeof(Func<>))
-                .Cache(Cache.Singleton));
         }
     }
 }

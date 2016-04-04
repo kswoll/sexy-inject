@@ -39,6 +39,8 @@ namespace SexyInject.Emit
                     var popCount = instruction.GetPopCount();
                     if (instruction.OpCode == OpCodes.Dup)
                         popCount = 0;
+                    if (instruction.IsLoadLocal())
+                        popCount = 1;
                     var popped = Enumerable.Range(0, popCount).Select(x => stack.Pop()).Reverse().ToArray();
                     var packet = new ILInstructionPacket(instruction, popped);
                     stack.Push(packet);

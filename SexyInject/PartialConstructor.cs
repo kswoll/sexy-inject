@@ -2,5 +2,5 @@
 
 namespace SexyInject
 {
-    public delegate T PartialConstructor<T>(Func<T> factory);
+    public delegate T PartialConstructor<T>(Func<ResolveContext, T> factory);
 }

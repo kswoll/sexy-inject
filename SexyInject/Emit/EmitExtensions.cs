@@ -53,5 +53,12 @@ namespace SexyInject.Emit
                 return false;
             }
         }
+
+        public static bool IsLoadLocal(this ILInstruction instruction)
+        {
+            var op = instruction.OpCode;
+            return op == OpCodes.Ldloc || op == OpCodes.Ldloc_S || op == OpCodes.Ldloc_0 || op == OpCodes.Ldloc_1 || 
+                op == OpCodes.Ldloc_2 || op == OpCodes.Ldloc_3;
+        }
     }
 }

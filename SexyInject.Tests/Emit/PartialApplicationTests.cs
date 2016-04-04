@@ -241,6 +241,22 @@ namespace SexyInject.Tests.Emit
             Assert.IsTrue(instance.Value);
         }
 
+        [Test]
+        public void MoreComplex()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.RegisterPartialApplicationPattern();
+            registry.Bind<int>(x => x.To(-1));
+            registry.Bind<string>(x => x.To("foo"));
+            registry.Bind<bool>(x => x.To(true));
+            registry.Bind<DateTime>(x => x.To(new DateTime(2015, 1, 1)));
+            var instance = registry.Construct(_ => new ClassThatDependsOnLargerStruct(largerTestStruct: new LargerTestStruct(10, "bar", new DateTime(2016, 2, 3))));
+            Assert.AreEqual(10, instance.LargerTestStruct.Value);
+            Assert.AreEqual("bar", instance.LargerTestStruct.String);
+            Assert.AreEqual(new DateTime(2016, 2, 3), instance.LargerTestStruct.Date);
+        }
+
         class NoArgumentConstructorClass
         {
         }
@@ -472,6 +488,36 @@ namespace SexyInject.Tests.Emit
             public TestStruct(int value)
             {
                 Value = value;
+            }
+        }
+
+        struct LargerTestStruct
+        {
+            public int Value { get; set; }
+            public string String { get; set; }
+            public DateTime Date { get; set; }
+
+            public LargerTestStruct(int value, string @string, DateTime date)
+            {
+                Value = value;
+                String = @string;
+                Date = date;
+            }
+        }
+
+        class ClassThatDependsOnLargerStruct
+        {
+            public NoArgumentConstructorClass NoArgumentConstructorClass { get; }
+            public LargerTestStruct LargerTestStruct { get; }
+            public TestStruct TestStruct { get; }
+            public ClassWithBoolDefaultFalse BoolDefaultFalseClass { get; }
+
+            public ClassThatDependsOnLargerStruct(NoArgumentConstructorClass noArgumentConstructorClass = null, LargerTestStruct largerTestStruct = default(LargerTestStruct), TestStruct testStruct = default(TestStruct), ClassWithBoolDefaultFalse boolDefaultFalseClass = null)
+            {
+                NoArgumentConstructorClass = noArgumentConstructorClass;
+                LargerTestStruct = largerTestStruct;
+                TestStruct = testStruct;
+                BoolDefaultFalseClass = boolDefaultFalseClass;
             }
         }
     }

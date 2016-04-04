@@ -11,7 +11,7 @@ namespace SexyInject
     public class Registry
     {
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2 && x.GetParameters()[1].ParameterType == typeof(Argument[]));
-        private static readonly MethodInfo partialApplicationMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Construct) && x.GetParameters().Length == 1 && x.GetParameters()[1].ParameterType.IsGenericType && x.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>));
+        private static readonly MethodInfo partialApplicationMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Construct) && x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType.IsGenericType && x.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>));
         private readonly ConcurrentDictionary<Type, Binding> bindings = new ConcurrentDictionary<Type, Binding>();
         private readonly ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>>();
         private readonly ConcurrentQueue<IGlobalResolverOperator> globalOperators = new ConcurrentQueue<IGlobalResolverOperator>();
@@ -213,7 +213,10 @@ namespace SexyInject
             var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType, Expression.Constant(new object[0])), x.ParameterType)).ToArray();
 
             // new T(arguments)
-            var body = Expression.New(constructor, arguments);
+            Expression body = Expression.New(constructor, arguments);
+
+            if (type.IsValueType)
+                body = Expression.Convert(body, typeof(object));
 
             // context => body
             var lambda = Expression.Lambda<Func<ResolveContext, object>>(body, contextParameter);

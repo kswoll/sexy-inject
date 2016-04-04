@@ -762,5 +762,20 @@ namespace SexyInject.Tests
             var b = 3;
             registry.Construct(_ => new PartialApplicationClass(1 + a - b, 2, "foo", "bar"));
         }
+
+        [Test]
+        public void PartialApplicationPattern()
+        {
+            var registry = new Registry();
+            registry.RegisterPartialApplicationPattern();
+
+            registry.Bind<SimpleClass>(x => x.To(_ => new SimpleClass { IntProperty = 5 }));
+            registry.Bind<SomeStruct>(x => x.To(_ => new SomeStruct(6)));
+
+            var constructor = registry.Get<PartialConstructor<PartialApplicationClass>>();
+            var instance = constructor(_ => new PartialApplicationClass(1, 2, "foo", "bar"));
+            Assert.AreEqual(5, instance.SimpleClass.IntProperty);
+            Assert.AreEqual(6, instance.SomeStruct.Value);
+        }
     }
 }
