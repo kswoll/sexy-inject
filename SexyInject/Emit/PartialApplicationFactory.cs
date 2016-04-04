@@ -12,7 +12,12 @@ namespace SexyInject.Emit
     {
         private static readonly ConcurrentDictionary<MethodInfo, DynamicMethod> cache = new ConcurrentDictionary<MethodInfo, DynamicMethod>();
 
-        public static Func<ResolveContext, T> CreateFactory<T>(Func<ResolveContext, T> factoryFunction)
+        public static Func<ResolveContext, T> CreateDelegate<T>(Func<ResolveContext, T> factoryFunction)
+        {
+            return (Func<ResolveContext, T>)CreateDelegate(typeof(T), factoryFunction);
+        }
+
+        public static Delegate CreateDelegate(Type type, Delegate factoryFunction)
         {
             var method = factoryFunction.GetMethodInfo();
             var dynamicMethod = cache.GetOrAdd(method, _ =>
@@ -110,7 +115,7 @@ namespace SexyInject.Emit
 
                 return injectedMethod;
             });
-            return (Func<ResolveContext, T>)dynamicMethod.CreateDelegate(typeof(Func<ResolveContext, T>), factoryFunction.Target);
+            return (Func<ResolveContext, object>)dynamicMethod.CreateDelegate(typeof(Func<,>).MakeGenericType(typeof(ResolveContext), type), factoryFunction.Target);
         }
 
         private static bool IsDefaultValue(ILInstructionPacket packet, Type type, object defaultValue, Dictionary<int, List<ILInstructionPacket>> locals)

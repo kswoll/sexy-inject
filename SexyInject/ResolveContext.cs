@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using SexyInject.Emit;
 
 namespace SexyInject
 {
@@ -197,6 +198,18 @@ namespace SexyInject
         public T Construct<T>(ConstructorSelector constructorSelector, params object[] arguments)
         {
             return (T)Construct(typeof(T), constructorSelector, arguments);
+        }
+
+        public T Construct<T>(Func<ResolveContext, T> constructor)
+        {
+            var factory = PartialApplicationFactory.CreateDelegate(constructor);
+            return factory(this);
+        }
+
+        public object Construct(Type type, Delegate constructor)
+        {
+            var factory = PartialApplicationFactory.CreateDelegate(type, constructor);
+            return factory.DynamicInvoke(this);
         }
 
         /// <summary>

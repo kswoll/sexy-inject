@@ -11,6 +11,7 @@ namespace SexyInject
     public class Registry
     {
         private static readonly MethodInfo getMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Get) && x.GetParameters().Length == 2 && x.GetParameters()[1].ParameterType == typeof(Argument[]));
+        private static readonly MethodInfo partialApplicationMethod = typeof(Registry).GetMethods().Single(x => x.Name == nameof(Construct) && x.GetParameters().Length == 1 && x.GetParameters()[1].ParameterType.IsGenericType && x.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>));
         private readonly ConcurrentDictionary<Type, Binding> bindings = new ConcurrentDictionary<Type, Binding>();
         private readonly ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>> factoryCache = new ConcurrentDictionary<Tuple<Type, ConstructorSelector>, Func<ResolveContext, object>>();
         private readonly ConcurrentQueue<IGlobalResolverOperator> globalOperators = new ConcurrentQueue<IGlobalResolverOperator>();
@@ -66,6 +67,11 @@ namespace SexyInject
         public Expression GetExpression(Type type)
         {
             return Expression.Convert(Expression.Call(Expression.Constant(this), getMethod, Expression.Constant(type), Expression.Constant(new Argument[0])), type);
+        }
+
+        public Expression PartialApplicationExpression(Type type, Expression constructor)
+        {
+            return Expression.Call(Expression.Constant(this), partialApplicationMethod.MakeGenericMethod(type), constructor);
         }
 
         public T Construct<T>()
@@ -126,8 +132,13 @@ namespace SexyInject
         public T Construct<T>(Func<ResolveContext, T> constructor)
         {
             var context = CreateResolverContext(Enumerable.Empty<object>());
-            var factory = PartialApplicationFactory.CreateFactory(constructor);
-            return factory(context);
+            return context.Construct(constructor);
+        }
+
+        public object Construct(Type type, Delegate constructor)
+        {
+            var context = CreateResolverContext(Enumerable.Empty<object>());
+            return context.Construct(type, constructor);
         }
 
         public void AddGlobalHeadOperator(Func<ResolverContext, ResolverContext> @operator, Func<ResolverContext, bool> predicate = null)

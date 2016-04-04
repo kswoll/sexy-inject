@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace SexyInject
@@ -53,6 +54,14 @@ namespace SexyInject
         public static void RegisterTransientCachingPattern(this Registry registry)
         {
             registry.AddGlobalTailOperator(x => x.Cache(Cache.Transient));
+        }
+
+        public static void RegisterPartialApplicationPattern(this Registry registry)
+        {
+            registry.Bind(typeof(Func<>), x => x
+                .To((context, type) => constructor => context.Construct(type, constructor))
+                .When(type => type.GetGenericArguments().Single().IsGenericType && type.GetGenericArguments().Single().GetGenericTypeDefinition() == typeof(Func<>))
+                .Cache(Cache.Singleton));
         }
     }
 }

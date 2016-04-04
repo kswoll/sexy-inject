@@ -83,6 +83,7 @@
     <Compile Include="InjectAttribute.cs" />
     <Compile Include="IResolverOperator.cs" />
     <Compile Include="LambdaGlobalResolverOperator.cs" />
+    <Compile Include="PartialConstructor.cs" />
     <Compile Include="ResolverProcessor.cs" />
     <Compile Include="Emit\ILReader.cs" />
     <Compile Include="Utils\EnumExtensions.cs" />
