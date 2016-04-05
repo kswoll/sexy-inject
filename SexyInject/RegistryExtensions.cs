@@ -35,7 +35,7 @@ namespace SexyInject
                     return constructorType.IsGenericType && constructorType.GetGenericTypeDefinition() == typeof(Func<,>) && constructorType.GetGenericArguments()[0] == typeof(ResolveContext) && constructorType.GetGenericArguments()[1] == returnType;
                 })
                 .Cache(Cache.Singleton));
-            registry.Bind(typeof(PartialConstructor<>), x => x
+            registry.Bind(typeof(Constructor<>), x => x
                 .To((context, type) =>
                 {
                     var returnType = type.GetGenericArguments()[0];

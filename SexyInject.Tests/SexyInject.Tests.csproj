@@ -64,6 +64,7 @@
     <Compile Include="TestClasses\BaseClass.cs" />
     <Compile Include="TestClasses\ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass.cs" />
     <Compile Include="TestClasses\ClassWithDependencyOnSimpleClass.cs" />
+    <Compile Include="TestClasses\ClassWithInternalConstructor.cs" />
     <Compile Include="TestClasses\ConstructedGenericClass.cs" />
     <Compile Include="TestClasses\GenericClass.cs" />
     <Compile Include="TestClasses\GenericSubclass.cs" />

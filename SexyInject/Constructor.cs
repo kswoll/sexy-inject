@@ -10,4 +10,6 @@ namespace SexyInject
     /// one of the constructors with highest number of parameters will be used</param>
     /// <returns>An instance of the specified type</returns>
     public delegate object Constructor(Type type, ConstructorSelector constructorSelector = null);
+
+    public delegate T Constructor<T>(Func<ResolveContext, T> factory);
 }
