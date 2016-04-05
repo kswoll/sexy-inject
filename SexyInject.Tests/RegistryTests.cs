@@ -97,14 +97,6 @@ namespace SexyInject.Tests
         }
 
         [Test]
-        public void ClassWithoutConstructorThrows()
-        {
-            var registry = new Registry();
-            registry.Bind<object>(x => x.To(type => registry.Construct(type)));
-            Assert.Throws<ArgumentException>(() => registry.Get<ClassWithoutConstructor>());
-        }
-
-        [Test]
         public void PredicatedResolver()
         {
             var registry = new Registry();

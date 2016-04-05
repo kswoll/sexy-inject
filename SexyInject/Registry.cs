@@ -203,9 +203,6 @@ namespace SexyInject
             constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
 
             var constructor = constructorSelector(type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public));
-            if (constructor == null)
-                throw new ArgumentException($"Type {type.FullName} must have at least one public constructor", nameof(type));
-
             var parameters = constructor.GetParameters();
             var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
 
