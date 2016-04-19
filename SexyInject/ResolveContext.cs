@@ -39,6 +39,16 @@ namespace SexyInject
             }
         }
 
+        public void Cache(Type type, object o)
+        {
+            cache[type] = o;
+        }
+
+        public bool TryRetrieveFromCache(Type type, out object result)
+        {
+            return cache.TryGetValue(type, out result);
+        }
+
         /// <summary>
         /// Resolves the specified type using the binding rules specified in the registry.  When constructing binding rules
         /// that provide a context, you should always use this method to resolve types rather than through Registry.Get.  This

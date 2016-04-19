@@ -165,7 +165,8 @@ namespace SexyInject
 
         private object Construct(ResolveContext context, Type type, ConstructorSelector constructorSelector, object[] arguments)
         {
-            return context.Construct(type, constructorSelector, arguments);
+            var result = context.Construct(type, constructorSelector, arguments);
+            return result;
         }
 
         private ResolveContext CreateResolverContext(IEnumerable<object> arguments)
@@ -195,7 +196,8 @@ namespace SexyInject
 
         private object Get(ResolveContext context, Type type, object[] arguments)
         {
-            return context.Resolve(type, arguments);
+            var result = context.Resolve(type, arguments);
+            return result;
         }
 
         private Func<ResolveContext, object> FactoryGenerator(Type type, ConstructorSelector constructorSelector)

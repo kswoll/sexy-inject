@@ -85,6 +85,8 @@
     <Compile Include="LambdaGlobalResolverOperator.cs" />
     <Compile Include="ResolverProcessor.cs" />
     <Compile Include="Emit\ILReader.cs" />
+    <Compile Include="TransientCache.cs" />
+    <Compile Include="TransientCacheResolver.cs" />
     <Compile Include="Utils\EnumExtensions.cs" />
     <Compile Include="WhenResolvedResolver.cs" />
     <Compile Include="IResolver.cs" />

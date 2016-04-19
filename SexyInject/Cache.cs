@@ -30,6 +30,6 @@ namespace SexyInject
         /// .Cache(Cache.Transient);
         /// </c></para>
         /// </summary>
-        public static Func<ResolveContext, Type, object> Transient { get; } = (context, type) => Tuple.Create(context, type);
+        public static TransientCache Transient { get; } = new TransientCache();
     }
 }
