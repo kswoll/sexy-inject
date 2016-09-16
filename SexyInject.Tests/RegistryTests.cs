@@ -265,7 +265,7 @@ namespace SexyInject.Tests
             var registry = new Registry();
             registry.Bind<object>(x => x.To(type => registry.Construct(type)));
             var simpleClass = registry.Construct<SimpleClass>();
-            Assert.IsNotNull(simpleClass);           
+            Assert.IsNotNull(simpleClass);
         }
 
         [Test]
@@ -778,6 +778,24 @@ namespace SexyInject.Tests
 
             var instance = registry.Get<ClassWithInternalConstructor>();
             Assert.IsNotNull(instance);
+        }
+
+        [Test]
+        public void ResolutionPathOnError()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            registry.Bind<SimpleClass>(x => { throw new Exception(); });
+            registry.Get<ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass>();
+        }
+
+        [Test]
+        public void Rebind()
+        {
+            var registry = new Registry();
+            registry.Bind<int>(x => x.To(1));
+            registry.Bind<int>(x => x.OverrideTo(2));
+            Assert.AreEqual(2, registry.Get<int>());
         }
     }
 }

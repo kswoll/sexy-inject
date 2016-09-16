@@ -39,6 +39,8 @@ namespace SexyInject
             }
         }
 
+        public Type[] ActiveResolutionPath => frames.Select(x => x.RequestedType).ToArray();
+
         public void Cache(Type type, object o)
         {
             cache[type] = o;
@@ -82,7 +84,7 @@ namespace SexyInject
         /// to Registry.Get will lead to a new instance, which will cause unexpected behavior.
         /// </summary>
         /// <param name="type">The type to resolve through the registry</param>
-        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.  
+        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>An instance of the specified type</returns>
@@ -97,7 +99,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Useful for creating expression trees that invoke the Resolve method.  This can often be useful for creating 
+        /// Useful for creating expression trees that invoke the Resolve method.  This can often be useful for creating
         /// dynamically generated lambdas.
         /// </summary>
         /// <param name="resolveContext">The expression that represents the instance of ResolveContexet upon which you want
@@ -114,7 +116,7 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <param name="type">The type that should be instantiated.</param>
-        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
+        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which
         /// results in the selection of the first constructor with the most number of parameters.</param>
         /// <returns>A new instance of the specified type.</returns>
         public object Construct(Type type, ConstructorSelector constructorSelector)
@@ -136,7 +138,7 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <param name="type">The type that should be instantiated.</param>
-        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.  
+        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of the specified type.</returns>
@@ -149,9 +151,9 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <param name="type">The type that should be instantiated.</param>
-        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
+        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.  
+        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of the specified type.</returns>
@@ -174,7 +176,7 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <typeparam name="T">The type that should be instantiated.</typeparam>
-        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
+        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which
         /// results in the selection of the first constructor with the most number of parameters.</param>
         /// <returns>A new instance of T.</returns>
         public T Construct<T>(ConstructorSelector constructorSelector)
@@ -186,7 +188,7 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <typeparam name="T">The type that should be instantiated.</typeparam>
-        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.  
+        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of T.</returns>
@@ -199,9 +201,9 @@ namespace SexyInject
         /// Create a new instance of the specified type using the registered rules for resolving dependencies.
         /// </summary>
         /// <typeparam name="T">The type that should be instantiated.</typeparam>
-        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which 
+        /// <param name="constructorSelector">A callback to select the constructor on TTarget to use when instantiating TTarget.  Defaults to null which
         /// results in the selection of the first constructor with the most number of parameters.</param>
-        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.  
+        /// <param name="arguments">An array of objects that will be used when injecting dependencies into the target type.
         /// The scope of these arguments is localized to resolving this one instance vs. any other dependencies that might
         /// request an instance of the same type.</param>
         /// <returns>A new instance of T.</returns>

@@ -26,6 +26,14 @@ namespace SexyInject
             context.Close();
         }
 
+        public void Rebind<T>(Func<Binder<T>, ResolverContext> binder = null)
+        {
+            binder = binder ?? (x => x.To<T>());
+            var binding = bindings.GetOrAdd(typeof(T), x => new Binding(this, x));
+            var context = binder(new Binder<T>(binding));
+            context.Close();
+        }
+
         public void Bind(Type type, Func<Binder, ResolverContext> binder = null)
         {
             binder = binder ?? (x => x.To(type));
@@ -174,8 +182,8 @@ namespace SexyInject
             ResolveContext context = null;
             context = new ResolveContext(
                 this,
-                x => Resolve(context, x), 
-                (type, constructorSelector) => factoryCache.GetOrAdd(Tuple.Create(type, constructorSelector), x => FactoryGenerator(x.Item1, x.Item2))(context), 
+                x => Resolve(context, x),
+                (type, constructorSelector) => factoryCache.GetOrAdd(Tuple.Create(type, constructorSelector), x => FactoryGenerator(x.Item1, x.Item2))(context),
                 arguments);
             return context;
         }
@@ -189,9 +197,9 @@ namespace SexyInject
                     break;
             }
             if (binding == null)
-                throw new RegistryException($"The type {type.FullName} has not been registered.");
+                throw new RegistryException(new[] { type }, $"The type {type.FullName} has not been registered.");
 
-            return binding.Resolve(context, type);            
+            return binding.Resolve(context, type);
         }
 
         private object Get(ResolveContext context, Type type, object[] arguments)
