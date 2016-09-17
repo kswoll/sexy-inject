@@ -138,7 +138,7 @@ namespace SexyInject
             return context;
         }
 
-        public new ResolverContext<T> InsertResolver(IResolver resolver)
+        public ResolverContext<T> InsertResolver(IResolver resolver)
         {
             var context = new ResolverContext<T>(binding.Registry, binding, resolver);
             InsertResolverContext(context);

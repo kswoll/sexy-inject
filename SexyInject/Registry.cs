@@ -26,14 +26,6 @@ namespace SexyInject
             context.Close();
         }
 
-        public void Rebind<T>(Func<Binder<T>, ResolverContext> binder = null)
-        {
-            binder = binder ?? (x => x.To<T>());
-            var binding = bindings.GetOrAdd(typeof(T), x => new Binding(this, x));
-            var context = binder(new Binder<T>(binding));
-            context.Close();
-        }
-
         public void Bind(Type type, Func<Binder, ResolverContext> binder = null)
         {
             binder = binder ?? (x => x.To(type));
