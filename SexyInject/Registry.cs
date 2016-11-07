@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using SexyInject.Emit;
 
 namespace SexyInject
 {
@@ -205,6 +204,8 @@ namespace SexyInject
             constructorSelector = constructorSelector ?? (constructors => constructors.OrderByDescending(x => x.GetParameters().Length).FirstOrDefault());
 
             var constructor = constructorSelector(type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public));
+            if (constructor == null)
+                throw new InvalidTypeException($"Unable to create a factory to instantiate an instance of {type.FullName} as there are no constructors defined.");
             var parameters = constructor.GetParameters();
             var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
 

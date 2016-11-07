@@ -59,7 +59,6 @@ namespace SexyInject.Emit
                         }
                         localInstructions.Add(packet);
                     }
-                
                 }
 
                 var returnInstruction = stack.Pop();
@@ -109,7 +108,7 @@ namespace SexyInject.Emit
                     else
                     {
                         foreach (var instruction in argument.UnwrapInstructions())
-                            instruction.Emit(il);                    
+                            instruction.Emit(il);
                     }
                 }
                 constructorInstruction.Emit(il);
@@ -179,7 +178,7 @@ namespace SexyInject.Emit
             {
                 if (defaultValue.Equals(false))
                     return instruction.OpCode == OpCodes.Ldc_I4_0;
-                else 
+                else
                     return instruction.OpCode == OpCodes.Ldc_I4_1;
             }
             else if (type.IsValueType)

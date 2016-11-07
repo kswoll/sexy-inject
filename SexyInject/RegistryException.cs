@@ -2,7 +2,7 @@
 
 namespace SexyInject
 {
-    public class RegistryException : Exception 
+    public class RegistryException : Exception
     {
         public Type[] ResolutionPath { get; }
 
@@ -14,6 +14,12 @@ namespace SexyInject
         {
             ResolutionPath = resolutionPath;
         }
+
+        public RegistryException(Type[] resolutionPath, string message, Exception inner) : base(message, inner)
+        {
+            ResolutionPath = resolutionPath;
+        }
+
 
 //        public RegistryException(string message, Exception innerException) : base(message, innerException)
 //        {

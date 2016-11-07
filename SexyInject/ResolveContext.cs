@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using SexyInject.Emit;
 
 namespace SexyInject
@@ -215,13 +216,28 @@ namespace SexyInject
         public T Construct<T>(Func<ResolveContext, T> constructor)
         {
             var factory = PartialApplicationFactory.CreateDelegate(constructor);
-            return factory(this);
+
+            try
+            {
+                return factory(this);
+            }
+            catch (Exception e)
+            {
+                throw new ConstructorInvocationException($"Error invoking constructor for type {typeof(T).FullName}", e);
+            }
         }
 
         public object Construct(Type type, Delegate constructor)
         {
             var factory = PartialApplicationFactory.CreateDelegate(type, constructor);
-            return factory.DynamicInvoke(this);
+            try
+            {
+                return factory.DynamicInvoke(this);
+            }
+            catch (Exception e)
+            {
+                throw new ConstructorInvocationException($"Error invoking constructor for type {type.FullName}", e);
+            }
         }
 
         /// <summary>

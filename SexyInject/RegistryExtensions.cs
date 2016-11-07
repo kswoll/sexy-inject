@@ -73,7 +73,17 @@ namespace SexyInject
         {
             Func<Type, bool> isInstantiatable = type => !type.IsAbstract && !type.IsInterface && !type.IsGenericTypeDefinition;
             registry.Bind<object>(x => x
-                .To((context, type) => context.Constructor(type))
+                .To((context, type) =>
+                {
+                    try
+                    {
+                        return context.Constructor(type);
+                    }
+                    catch (InvalidTypeException e)
+                    {
+                        throw new RegistryException(context.ActiveResolutionPath, $"Binding failed to resolve an instance of {type.FullName}. Resolution Path: {string.Join("->", context.ActiveResolutionPath.Select(y => y.FullName))}", e);
+                    }
+                })
                 .When((context, targetType) => isInstantiatable(targetType)));
         }
 

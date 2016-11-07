@@ -799,5 +799,20 @@ namespace SexyInject.Tests
             registry.Bind<int>(x => x.OverrideTo(2));
             Assert.AreEqual(2, registry.Get<int>());
         }
+
+        [Test]
+        public void UninstantiatableTypeDoesntThrowOnImplicit()
+        {
+            var registry = new Registry();
+            registry.RegisterImplicitPattern();
+            Assert.Throws<RegistryException>(() => registry.Get<ClassWithInt>());
+        }
+
+        public class ClassWithInt
+        {
+            public ClassWithInt(int value)
+            {
+            }
+        }
     }
 }

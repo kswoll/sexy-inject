@@ -50,6 +50,7 @@
     <Compile Include="Constructor.cs" />
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
+    <Compile Include="Emit\ConstructorInvocationException.cs" />
     <Compile Include="Emit\DefaultFormatterProvider.cs" />
     <Compile Include="Emit\EmitExtensions.cs" />
     <Compile Include="Emit\IFormatProvider.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Emit\ShortInlineVarInstruction.cs" />
     <Compile Include="IGlobalResolverOperator.cs" />
     <Compile Include="InjectAttribute.cs" />
+    <Compile Include="InvalidTypeException.cs" />
     <Compile Include="IResolverOperator.cs" />
     <Compile Include="LambdaGlobalResolverOperator.cs" />
     <Compile Include="ResolverProcessor.cs" />
