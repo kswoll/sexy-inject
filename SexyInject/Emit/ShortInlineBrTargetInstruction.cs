@@ -20,7 +20,7 @@ namespace SexyInject.Emit
 
         public override void Emit(ILGenerator il)
         {
-            throw new NotImplementedException();
+            il.Emit(OpCode, delta);
         }
     }
 }

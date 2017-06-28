@@ -215,7 +215,15 @@ namespace SexyInject
 
         public T Construct<T>(Func<ResolveContext, T> constructor)
         {
-            var factory = PartialApplicationFactory.CreateDelegate(constructor);
+            Func<ResolveContext, T> factory;
+            try
+            {
+                factory = PartialApplicationFactory.CreateDelegate(constructor);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidFactoryException($"Error creating constructor delegate for {typeof(T).FullName}", e);
+            }
 
             try
             {

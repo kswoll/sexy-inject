@@ -21,7 +21,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<TestStruct>(x => x.To(_ => new TestStruct(5)));
             var instance = registry.Construct(_ => new OneArgumentConstructorWithDefaultValueStruct());
-            Assert.AreEqual(5, instance.Other.Value);            
+            Assert.AreEqual(5, instance.Other.Value);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace SexyInject.Tests.Emit
             var other = new NoArgumentConstructorClass();
             registry.Bind<NoArgumentConstructorClass>(x => x.To(_ => other));
             var instance = registry.Construct(_ => new OneArgumentConstructorWithDefaultValue());
-            Assert.AreEqual(other, instance.Other);            
+            Assert.AreEqual(other, instance.Other);
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 5));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefaultMinus1());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => (int)5));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefaultValueNullableInt());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -67,7 +67,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<short>(x => x.To(_ => (short)5));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault0Short());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<long>(x => x.To(_ => 5L));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1Long());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<float>(x => x.To(_ => 15.3F));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1Point3Float());
-            Assert.AreEqual(15.3F, instance.Value);            
+            Assert.AreEqual(15.3F, instance.Value);
         }
 
         [Test]
@@ -94,7 +94,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<double>(x => x.To(_ => 15.3D));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1000Point3Double());
-            Assert.AreEqual(15.3D, instance.Value);            
+            Assert.AreEqual(15.3D, instance.Value);
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<decimal>(x => x.To(_ => 15.3M));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1000Point3Decimal());
-            Assert.AreEqual(15.3M, instance.Value);            
+            Assert.AreEqual(15.3M, instance.Value);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 5));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault0());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 5));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1());
-            Assert.AreEqual(5, instance.Value);            
+            Assert.AreEqual(5, instance.Value);
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault2());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -139,7 +139,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault3());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -148,7 +148,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault4());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -157,7 +157,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault5());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -166,7 +166,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault6());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -175,7 +175,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault7());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -184,7 +184,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault8());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault9());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -202,7 +202,7 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             registry.Bind<int>(x => x.To(_ => 100));
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1000());
-            Assert.AreEqual(100, instance.Value);            
+            Assert.AreEqual(100, instance.Value);
         }
 
         [Test]
@@ -221,6 +221,26 @@ namespace SexyInject.Tests.Emit
             var registry = new Registry();
             var instance = registry.Construct(_ => new ClassOneArgumentConstructorWithDefault1(getValue()));
             Assert.AreEqual(42, instance.Value);
+        }
+
+        [Test]
+        public void PassLambda()
+        {
+            var registry = new Registry();
+            var instance = registry.Construct(_ => new ClassWithLambdaConstructor(() => 42));
+            Assert.AreEqual(42, instance.Func());
+        }
+
+        [Test]
+        public void PassMultipleLambdas()
+        {
+            var registry = new Registry();
+            int foo = 0;
+            var instance = registry.Construct(_ => new ClassWithMultipleLambdaConstructors(() => 42, () => foo = 5));
+            Assert.AreEqual(42, instance.Func());
+
+            instance.Action();
+            Assert.AreEqual(5, foo);
         }
 
         [Test]
@@ -534,6 +554,28 @@ namespace SexyInject.Tests.Emit
                 LargerTestStruct = largerTestStruct;
                 TestStruct = testStruct;
                 BoolDefaultFalseClass = boolDefaultFalseClass;
+            }
+        }
+
+        class ClassWithLambdaConstructor
+        {
+            public Func<int> Func { get; }
+
+            public ClassWithLambdaConstructor(Func<int> action)
+            {
+                Func = action;
+            }
+        }
+
+        class ClassWithMultipleLambdaConstructors
+        {
+            public Func<int> Func { get; }
+            public Action Action { get; }
+
+            public ClassWithMultipleLambdaConstructors(Func<int> func, Action action)
+            {
+                Func = func;
+                Action = action;
             }
         }
     }
