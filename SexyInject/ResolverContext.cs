@@ -37,7 +37,7 @@ namespace SexyInject
                     newOperators[j] = operators[i];
                 operators.RemoveRange(currentOperatorCount, newOperatorsCount);
                 operators.InsertRange(0, newOperators);
-            }            
+            }
         }
 
         internal void Close()
@@ -47,7 +47,7 @@ namespace SexyInject
                 foreach (var globalOperator in Registry.GlobalOperators)
                 {
                     globalOperator.AddHeadOperators(this);
-                }                
+                }
             });
             foreach (var globalOperator in Registry.GlobalOperators)
             {
@@ -172,7 +172,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Exactly the same as calling the InjectProperty overload that only accepts a property expression, 
+        /// Exactly the same as calling the InjectProperty overload that only accepts a property expression,
         /// but for each property you provide in the properties array.
         /// </summary>
         /// <param name="properties">The array of properties that should be injected with dependencies.</param>
@@ -199,7 +199,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is 
+        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is
         /// important.  For example, if you apply the Cache operator after the WhenResolved operator, WhenResolved will
         /// only be invoked when the object is first realized.  Conversely, if you apply this operator after the Cache
         /// operator, it will be invoked every time.
@@ -212,7 +212,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is 
+        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is
         /// important.  For example, if you apply the Cache operator after the WhenResolved operator, WhenResolved will
         /// only be invoked when the object is first realized.  Conversely, if you apply this operator after the Cache
         /// operator, it will be invoked every time.
@@ -277,7 +277,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Exactly the same as calling the InjectProperty overload that only accepts a property expression, 
+        /// Exactly the same as calling the InjectProperty overload that only accepts a property expression,
         /// but for each property you provide in the properties array.
         /// </summary>
         /// <param name="properties">The array of properties that should be injected with dependencies.</param>
@@ -331,7 +331,7 @@ namespace SexyInject
         public new ResolverContext<T> Cache(Func<Type, object> keySelector) => AddOperator(new CacheResolver((context, type) => keySelector(type)));
 
         /// <summary>
-        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is 
+        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is
         /// important.  For example, if you apply the Cache operator after the WhenResolved operator, WhenResolved will
         /// only be invoked when the object is first realized.  Conversely, if you apply this operator after the Cache
         /// operator, it will be invoked every time.
@@ -344,7 +344,7 @@ namespace SexyInject
         }
 
         /// <summary>
-        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is 
+        /// Allows you to provide custom behavior onto an instance after it has been resolved.  Note that order here is
         /// important.  For example, if you apply the Cache operator after the WhenResolved operator, WhenResolved will
         /// only be invoked when the object is first realized.  Conversely, if you apply this operator after the Cache
         /// operator, it will be invoked every time.

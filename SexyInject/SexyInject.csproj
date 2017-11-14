@@ -50,6 +50,7 @@
     <Compile Include="Constructor.cs" />
     <Compile Include="ConstructorSelector.cs" />
     <Compile Include="ConstructorResolver.cs" />
+    <Compile Include="CyclicalDependenciesException.cs" />
     <Compile Include="Emit\ConstructorInvocationException.cs" />
     <Compile Include="Emit\DefaultFormatterProvider.cs" />
     <Compile Include="Emit\EmitExtensions.cs" />

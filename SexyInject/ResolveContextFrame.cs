@@ -16,7 +16,7 @@ namespace SexyInject
             this.context = context;
 
             RequestedType = requestedType;
-            foreach (var argument in arguments) 
+            foreach (var argument in arguments)
                 InjectArgument(argument);
         }
 
@@ -51,6 +51,24 @@ namespace SexyInject
             {
                 return false;
             }
+        }
+
+        protected bool Equals(ResolveContextFrame other)
+        {
+            return RequestedType == other.RequestedType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((ResolveContextFrame) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return RequestedType != null ? RequestedType.GetHashCode() : 0;
         }
     }
 }

@@ -9,3 +9,5 @@ SexyInject/obj/
 SexyInject/bin/
 SexyInject.Tests/obj/
 SexyInject.Tests/bin/
+_ReSharper.Caches/
+.vs/

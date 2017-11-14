@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BinderTests.cs" />
+    <Compile Include="CircularReferenceTests.cs" />
     <Compile Include="ConstrainingBindingsTests.cs" />
     <Compile Include="Emit\PartialApplicationTests.cs" />
     <Compile Include="Emit\TestClasses\FieldClass.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="ResolveContextTests.cs" />
     <Compile Include="ResolverContextTests.cs" />
     <Compile Include="TestClasses\BaseClass.cs" />
+    <Compile Include="TestClasses\CircularReferenceClasses.cs" />
     <Compile Include="TestClasses\ClassWithDependencyOnOtherClassWithDependencyOnSimpleClass.cs" />
     <Compile Include="TestClasses\ClassWithDependencyOnSimpleClass.cs" />
     <Compile Include="TestClasses\ClassWithInternalConstructor.cs" />

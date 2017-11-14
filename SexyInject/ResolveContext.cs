@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using SexyInject.Emit;
 
 namespace SexyInject
@@ -18,6 +19,7 @@ namespace SexyInject
         private readonly Func<Type, object> resolver;
         private readonly Constructor constructor;
         private readonly List<ResolveContextFrame> frames = new List<ResolveContextFrame>();
+        private readonly HashSet<ResolveContextFrame> framesSet = new HashSet<ResolveContextFrame>();
 
         private static readonly MethodInfo resolveMethod = typeof(ResolveContext).GetMethods().Single(x => x.Name == nameof(Resolve) && x.GetParameters().Length == 2);
 
@@ -94,7 +96,7 @@ namespace SexyInject
             object result;
             if (!cache.TryGetValue(type, out result) && (!frames.LastOrDefault()?.TryGetArgument(type, out result) ?? true))
             {
-                result = ProcessFrame(type, arguments, () => resolver(type));
+                result = ProcessFrame(type, arguments, () => resolver(type), true);
             }
             return result;
         }
@@ -160,7 +162,7 @@ namespace SexyInject
         /// <returns>A new instance of the specified type.</returns>
         public object Construct(Type type, ConstructorSelector constructorSelector, params object[] arguments)
         {
-            return ProcessFrame(type, arguments, () => constructor(type, constructorSelector));
+            return ProcessFrame(type, arguments, () => constructor(type, constructorSelector), false);
         }
 
         /// <summary>
@@ -262,11 +264,25 @@ namespace SexyInject
             return frames[trueIndex].RequestedType;
         }
 
-        private object ProcessFrame(Type type, object[] arguments, Func<object> action)
+        private object ProcessFrame(Type type, object[] arguments, Func<object> action, bool checkCycles)
         {
-            frames.Add(new ResolveContextFrame(this, type, arguments));
+            var frame = new ResolveContextFrame(this, type, arguments);
+            if (framesSet.Contains(frame) && checkCycles)
+            {
+                var builder = new StringBuilder();
+                builder.AppendLine($"Cyclical dependencies when resolving {type.FullName}");
+                foreach (var currentFrame in frames.AsEnumerable().Reverse())
+                {
+                    builder.AppendLine($"    requested by {currentFrame.RequestedType.FullName}");
+                }
+                throw new CyclicalDependenciesException(builder.ToString());
+            }
+
+            frames.Add(frame);
+            framesSet.Add(frame);
             var result = action();
             frames.RemoveAt(frames.Count - 1);
+            framesSet.Remove(frame);
             return result;
         }
 
