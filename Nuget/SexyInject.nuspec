@@ -1,4 +1,3 @@
-
 <package>
   <metadata>
     <id>SexyInject</id>
@@ -12,5 +11,8 @@
     <description>A sexier .NET dependency injection framework</description>
     <copyright>Copyright 2016</copyright>
     <tags>dependency injection</tags>
+    <dependencyGroup>
+      <group targetFramework=".NETFramework4.5" />
+    </dependencyGroup>    
   </metadata>
 </package>
