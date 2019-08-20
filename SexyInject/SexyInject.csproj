@@ -1,118 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D5FF8BF2-0176-496B-A94E-858A90D9CA6B}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SexyInject</RootNamespace>
-    <AssemblyName>SexyInject</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>2.0.0</Version>
+    <Authors>Kirk Woll</Authors>
+    <Company />
+    <Product />
+    <Description>A sexier .NET dependency injection framework</Description>
+    <Copyright>Copyright 2016-2019</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kswoll/sexy-inject</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kswoll/sexy-inject</RepositoryUrl>
+    <PackageTags>dependency injection di</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Argument.cs" />
-    <Compile Include="ArgumentExtensions.cs" />
-    <Compile Include="ArgumentType.cs" />
-    <Compile Include="Binding.cs" />
-    <Compile Include="Binder.cs" />
-    <Compile Include="Cache.cs" />
-    <Compile Include="CacheResolver.cs" />
-    <Compile Include="ClassInjectionResolver.cs" />
-    <Compile Include="Constructor.cs" />
-    <Compile Include="ConstructorSelector.cs" />
-    <Compile Include="ConstructorResolver.cs" />
-    <Compile Include="CyclicalDependenciesException.cs" />
-    <Compile Include="Emit\ConstructorInvocationException.cs" />
-    <Compile Include="Emit\DefaultFormatterProvider.cs" />
-    <Compile Include="Emit\EmitExtensions.cs" />
-    <Compile Include="Emit\IFormatProvider.cs" />
-    <Compile Include="Emit\IILProvider.cs" />
-    <Compile Include="Emit\ILArgumentExpression.cs" />
-    <Compile Include="Emit\ILInstruction.cs" />
-    <Compile Include="Emit\ILInstructionPacket.cs" />
-    <Compile Include="Emit\ILInstructionVisitor.cs" />
-    <Compile Include="Emit\PartialApplicationFactory.cs" />
-    <Compile Include="Emit\InlineBrTargetInstruction.cs" />
-    <Compile Include="Emit\InlineFieldInstruction.cs" />
-    <Compile Include="Emit\InlineI8Instruction.cs" />
-    <Compile Include="Emit\InlineIInstruction.cs" />
-    <Compile Include="Emit\InlineMethodInstruction.cs" />
-    <Compile Include="Emit\InlineNoneInstruction.cs" />
-    <Compile Include="Emit\InlineRInstruction.cs" />
-    <Compile Include="Emit\InlineSigInstruction.cs" />
-    <Compile Include="Emit\InlineStringInstruction.cs" />
-    <Compile Include="Emit\InlineSwitchInstruction.cs" />
-    <Compile Include="Emit\InlineTokInstruction.cs" />
-    <Compile Include="Emit\InlineTypeInstruction.cs" />
-    <Compile Include="Emit\InlineVarInstruction.cs" />
-    <Compile Include="Emit\InvalidFactoryException.cs" />
-    <Compile Include="Emit\ITokenResolver.cs" />
-    <Compile Include="Emit\MethodBaseILProvider.cs" />
-    <Compile Include="Emit\ShortInlineBrTargetInstruction.cs" />
-    <Compile Include="Emit\ShortInlineInstruction.cs" />
-    <Compile Include="Emit\ShortInlineRInstruction.cs" />
-    <Compile Include="Emit\ShortInlineVarInstruction.cs" />
-    <Compile Include="IGlobalResolverOperator.cs" />
-    <Compile Include="InjectAttribute.cs" />
-    <Compile Include="InvalidTypeException.cs" />
-    <Compile Include="IResolverOperator.cs" />
-    <Compile Include="LambdaGlobalResolverOperator.cs" />
-    <Compile Include="ResolverProcessor.cs" />
-    <Compile Include="Emit\ILReader.cs" />
-    <Compile Include="TransientCache.cs" />
-    <Compile Include="TransientCacheResolver.cs" />
-    <Compile Include="Utils\EnumExtensions.cs" />
-    <Compile Include="WhenResolvedResolver.cs" />
-    <Compile Include="IResolver.cs" />
-    <Compile Include="LambdaResolver.cs" />
-    <Compile Include="PredicatedResolver.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyInjectionResolver.cs" />
-    <Compile Include="Registry.cs" />
-    <Compile Include="RegistryExtensions.cs" />
-    <Compile Include="ResolveContext.cs" />
-    <Compile Include="RegistryException.cs" />
-    <Compile Include="ResolveContextFrame.cs" />
-    <Compile Include="ResolverContext.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
