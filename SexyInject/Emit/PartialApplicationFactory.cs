@@ -92,7 +92,8 @@ namespace SexyInject.Emit
                 {
                     var argument = arguments[i];
                     var parameter = parameters[i];
-                    if (parameter.IsOptional && IsDefaultValue(argument, parameter.ParameterType, parameter.DefaultValue, instructionsByLocalVariable))
+                    var isParameterIgnored = parameter.GetCustomAttribute<IgnoreInjectAttribute>() != null;
+                    if (parameter.IsOptional && !isParameterIgnored && IsDefaultValue(argument, parameter.ParameterType, parameter.DefaultValue, instructionsByLocalVariable))
                     {
                         // Use the context to resolve the argument
                         il.Emit(OpCodes.Ldarg_1);

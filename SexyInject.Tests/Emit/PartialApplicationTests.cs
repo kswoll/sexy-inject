@@ -232,6 +232,14 @@ namespace SexyInject.Tests.Emit
         }
 
         [Test]
+        public void IgnoreLambda()
+        {
+            var registry = new Registry();
+            var instance = registry.Construct(_ => new ClassWithIgnoredLambdaConstructor());
+            Assert.IsNull(instance.Func);
+        }
+
+        [Test]
         public void PassMultipleLambdas()
         {
             var registry = new Registry();
@@ -562,6 +570,16 @@ namespace SexyInject.Tests.Emit
             public Func<int> Func { get; }
 
             public ClassWithLambdaConstructor(Func<int> action)
+            {
+                Func = action;
+            }
+        }
+
+        class ClassWithIgnoredLambdaConstructor
+        {
+            public Action Func { get; }
+
+            public ClassWithIgnoredLambdaConstructor([IgnoreInject]Action action = null)
             {
                 Func = action;
             }
