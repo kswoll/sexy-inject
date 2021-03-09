@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SexyInject.Emit;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -210,7 +211,19 @@ namespace SexyInject
             var contextParameter = Expression.Parameter(typeof(ResolveContext), "context");
 
             // context.TryResolve(arg0Type), context.TryResolve(arg1Type)...
-            var arguments = parameters.Select(x => Expression.Convert(ResolveContext.ResolveExpression(contextParameter, x.ParameterType, Expression.Constant(new object[0])), x.ParameterType)).ToArray();
+            var arguments = new List<UnaryExpression>();
+            foreach (var parameter in parameters)
+            {
+                try
+                {
+                    var expression = Expression.Convert(ResolveContext.ResolveExpression(contextParameter, parameter.ParameterType, Expression.Constant(new object[0])), parameter.ParameterType);
+                    arguments.Add(expression);
+                }
+                catch (Exception ex)
+                {
+                    throw new ConstructorInvocationException($"Error injecting type {type} for constructor parameter:\r\n{parameter}\r\nOf constructor:\r\n {constructor}", ex);
+                }
+            }
 
             // new T(arguments)
             Expression body = Expression.New(constructor, arguments);
